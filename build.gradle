@@ -1,0 +1,53 @@
+buildscript {
+    dependencies {
+        classpath 'com.google.gradle:osdetector-gradle-plugin:1.4.0'
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE")
+    }
+}
+repositories {
+    maven {
+	        url "http://xbib.org/repository"
+	}
+}
+apply plugin: 'java'
+apply plugin: "com.google.osdetector"
+apply plugin: 'spring-boot'
+
+ext {
+    versions = [
+      'elasticsearch' : '2.3.4',
+      'elasticsearch-helper' : '2.3.4.0',
+      'log4j': '2.5',
+      'wagon' : '2.10',
+      'mysql' : '5.1.38',
+      'jts' : '1.13'
+    ]
+}
+
+def tcnative_classifier = osdetector.classifier;
+
+if (osdetector.os == "linux" && osdetector.release.isLike("fedora")) {
+    tcnative_classifier += "-fedora";
+}
+
+configurations {
+  all*.exclude group: 'ch.qos.logback', module: 'logback'
+  all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
+}
+
+dependencies {
+    compile 'org.elasticsearch:elasticsearch:' + versions.elasticsearch
+    compile 'org.xbib.elasticsearch.plugin:elasticsearch-helper:' + versions.'elasticsearch-helper'
+    compile('com.vividsolutions:jts:' + versions.jts) {
+        exclude group: 'xerces'
+    }
+    compile 'mysql:mysql-connector-java:' + versions.mysql
+    compile 'org.apache.maven.wagon:wagon-ssh-external:' + versions.wagon
+    compile 'io.netty:netty-tcnative-boringssl-static:1.1.33.Fork23:' + tcnative_classifier
+     compile group: "com.alibaba", name: "druid", version: "1.0.26"
+    compile group: "com.quancheng.saluki", name: "spring-boot-starter-saluki", version: "1.5.2+"
+    compile group: "com.quancheng.saluki", name: "spring-boot-starter-saluki-monitor", version: "1.5.2+"
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version:'1.4.1.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version:'1.4.1.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:'1.4.1.RELEASE'
+}

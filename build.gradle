@@ -1,6 +1,5 @@
 buildscript {
     dependencies {
-        classpath 'com.google.gradle:osdetector-gradle-plugin:1.4.0'
         classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE")
     }
 }
@@ -10,7 +9,6 @@ repositories {
 	}
 }
 apply plugin: 'java'
-apply plugin: "com.google.osdetector"
 apply plugin: 'spring-boot'
 
 ext {
@@ -22,12 +20,6 @@ ext {
       'mysql' : '5.1.38',
       'jts' : '1.13'
     ]
-}
-
-def tcnative_classifier = osdetector.classifier;
-
-if (osdetector.os == "linux" && osdetector.release.isLike("fedora")) {
-    tcnative_classifier += "-fedora";
 }
 
 configurations {
@@ -44,9 +36,7 @@ dependencies {
     compile 'mysql:mysql-connector-java:' + versions.mysql
     compile 'org.apache.maven.wagon:wagon-ssh-external:' + versions.wagon
     compile 'io.netty:netty-tcnative-boringssl-static:1.1.33.Fork23:' + tcnative_classifier
-     compile group: "com.alibaba", name: "druid", version: "1.0.26"
-    compile group: "com.quancheng.saluki", name: "spring-boot-starter-saluki", version: "1.5.2+"
-    compile group: "com.quancheng.saluki", name: "spring-boot-starter-saluki-monitor", version: "1.5.2+"
+    compile group: "com.alibaba", name: "druid", version: "1.0.26"
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version:'1.4.1.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version:'1.4.1.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:'1.4.1.RELEASE'

@@ -1,0 +1,42 @@
+buildscript {
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE")
+    }
+}
+repositories {
+    maven {
+	        url "http://xbib.org/repository"
+	}
+}
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+ext {
+    versions = [
+      'elasticsearch' : '2.3.4',
+      'elasticsearch-helper' : '2.3.4.0',
+      'log4j': '2.5',
+      'wagon' : '2.10',
+      'mysql' : '5.1.38',
+      'jts' : '1.13'
+    ]
+}
+configurations {
+  all*.exclude group: 'ch.qos.logback', module: 'logback'
+  all*.exclude group: 'ch.qos.logback', module: 'logback-classic'
+}
+dependencies {
+    compile 'org.elasticsearch:elasticsearch:' + versions.elasticsearch
+    compile 'org.xbib.elasticsearch.plugin:elasticsearch-helper:' + versions.'elasticsearch-helper'
+    compile('com.vividsolutions:jts:' + versions.jts) {
+        exclude group: 'xerces'
+    }
+    compile 'mysql:mysql-connector-java:' + versions.mysql
+    compile 'org.apache.maven.wagon:wagon-ssh-external:' + versions.wagon
+    compile 'com.google.code.gson:gson:2.8.0'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.4'
+    compile group: "com.alibaba", name: "druid", version: "1.0.26"
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version:'1.4.1.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version:'1.4.1.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:'1.4.1.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:'1.4.1.RELEASE'
+}

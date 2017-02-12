@@ -238,6 +238,7 @@ public class JDBCImporter extends AbstractPipeline<SettingsPipelineRequest> impl
             this.context = StrategyLoader.newContext(strategy);
             logger.info("strategy {}: settings = {}, context = {}", strategy, settings.getAsMap(), context);
             context.setSettings(settings);
+            context.setSyncTaskDTO(syncTaskDTO);
         }
         context.execute();
     }

@@ -55,7 +55,7 @@ public class SyncTaskStateDTO {
     }
 
     public Settings loadConfigSetting() {
-        if (this.id != 0 && this.id != null) {
+        if (this.id != null && this.id != 0) {
             SyncTaskStateDO latestStateDO = syncTaskStateDao.findOne(this.id);
             this.stateSetting = latestStateDO.getStateSetting();
             this.isDeleted = latestStateDO.getIsDeleted();
@@ -65,7 +65,7 @@ public class SyncTaskStateDTO {
     }
 
     public SyncTaskStateDTO loadLatestState() {
-        if (this.id != 0 && this.id != null) {
+        if (this.id != null && this.id != 0) {
             SyncTaskStateDO latestStateDO = syncTaskStateDao.findOne(this.id);
             this.stateSetting = latestStateDO.getStateSetting();
             this.isDeleted = latestStateDO.getIsDeleted();

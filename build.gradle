@@ -41,4 +41,5 @@ dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version:'1.4.1.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version:'1.4.1.RELEASE'
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:'1.4.1.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:'1.4.1.RELEASE'
 }

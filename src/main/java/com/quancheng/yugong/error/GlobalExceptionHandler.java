@@ -5,7 +5,7 @@
  * use it only in accordance with the terms of the license agreement you entered
  * into with Quancheng-ec.com.
  */
-package com.quancheng.yugong.exception;
+package com.quancheng.yugong.error;
 
 import javax.servlet.http.HttpServletRequest;
 

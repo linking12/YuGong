@@ -7,6 +7,7 @@
  */
 package com.quancheng.yugong.repository.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -34,7 +35,7 @@ public class SyncTaskDO extends BaseDO {
     @Column(name = "sync_setting")
     private String          setting;
 
-    @OneToOne(mappedBy = "syncTask", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "syncTask", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private SyncTaskStateDO syncTaskState;
 
     public String getIndex() {

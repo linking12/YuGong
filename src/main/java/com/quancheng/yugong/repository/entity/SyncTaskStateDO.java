@@ -7,7 +7,6 @@
  */
 package com.quancheng.yugong.repository.entity;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -23,7 +22,7 @@ import javax.persistence.Table;
 @Table(name = "yugong_synctask_state")
 public class SyncTaskStateDO extends BaseDO {
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "sync_task_id")
     private SyncTaskDO syncTask;
 

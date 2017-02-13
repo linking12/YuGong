@@ -51,7 +51,7 @@ import org.xbib.pipeline.SimplePipelineExecutor;
 import com.quancheng.yugong.domain.dto.SyncTaskDTO;
 import com.quancheng.yugong.domain.dto.SyncTaskStateDTO;
 
-public class JDBCImporter extends AbstractPipeline<SettingsPipelineRequest> implements Runnable, CommandLineInterpreter {
+public class JDBCImporter extends AbstractPipeline<SettingAndSyncTaskDTOPipelineRequest> implements Runnable, CommandLineInterpreter {
 
     private final static Logger logger   = LogManager.getLogger("importer.jdbc");
 
@@ -59,7 +59,7 @@ public class JDBCImporter extends AbstractPipeline<SettingsPipelineRequest> impl
 
     private volatile boolean    shutdown;
 
-    private static Settings     settings = Settings.EMPTY;
+    private Settings            settings = Settings.EMPTY;
 
     private ExecutorService     executorService;
 
@@ -69,11 +69,11 @@ public class JDBCImporter extends AbstractPipeline<SettingsPipelineRequest> impl
 
     private SyncTaskDTO         syncTaskDTO;
 
-    protected PipelineProvider<Pipeline<SettingsPipelineRequest>> pipelineProvider() {
-        return new PipelineProvider<Pipeline<SettingsPipelineRequest>>() {
+    protected PipelineProvider<Pipeline<SettingAndSyncTaskDTOPipelineRequest>> pipelineProvider() {
+        return new PipelineProvider<Pipeline<SettingAndSyncTaskDTOPipelineRequest>>() {
 
             @Override
-            public Pipeline<SettingsPipelineRequest> get() {
+            public Pipeline<SettingAndSyncTaskDTOPipelineRequest> get() {
                 JDBCImporter jdbcImporter = new JDBCImporter();
                 jdbcImporter.setQueue(getQueue());
                 return jdbcImporter;
@@ -215,16 +215,18 @@ public class JDBCImporter extends AbstractPipeline<SettingsPipelineRequest> impl
             settings = settings.getAsSettings("jdbc");
         }
         Runtime.getRuntime().addShutdownHook(shutdownHook());
-        BlockingQueue<SettingsPipelineRequest> queue = new ArrayBlockingQueue<>(32);
+        BlockingQueue<SettingAndSyncTaskDTOPipelineRequest> queue = new ArrayBlockingQueue<>(32);
         setQueue(queue);
-        SettingsPipelineRequest element = new SettingsPipelineRequest().set(settings);
+        SettingAndSyncTaskDTO settingAndSyncTaskDTO = new SettingAndSyncTaskDTO(settings, syncTaskDTO);
+        SettingAndSyncTaskDTOPipelineRequest element = new SettingAndSyncTaskDTOPipelineRequest().set(settingAndSyncTaskDTO);
         getQueue().put(element);
         this.executorService = Executors.newFixedThreadPool(settings.getAsInt("concurrency", 1));
         logger.debug("prepare ended");
     }
 
     @Override
-    public void newRequest(Pipeline<SettingsPipelineRequest> pipeline, SettingsPipelineRequest request) {
+    public void newRequest(Pipeline<SettingAndSyncTaskDTOPipelineRequest> pipeline,
+                           SettingAndSyncTaskDTOPipelineRequest request) {
         try {
             process(request.get());
         } catch (Exception ex) {
@@ -232,13 +234,13 @@ public class JDBCImporter extends AbstractPipeline<SettingsPipelineRequest> impl
         }
     }
 
-    private void process(Settings settings) throws Exception {
+    private void process(SettingAndSyncTaskDTO settingAndSyncTaskDTO) throws Exception {
         if (context == null) {
             String strategy = settings.get("strategy", "standard");
             this.context = StrategyLoader.newContext(strategy);
             logger.info("strategy {}: settings = {}, context = {}", strategy, settings.getAsMap(), context);
-            context.setSettings(settings);
-            context.setSyncTaskDTO(syncTaskDTO);
+            context.setSettings(settingAndSyncTaskDTO.getSetting());
+            context.setSyncTaskDTO(settingAndSyncTaskDTO.getSyncTaskDto());
         }
         context.execute();
     }
@@ -273,7 +275,7 @@ public class JDBCImporter extends AbstractPipeline<SettingsPipelineRequest> impl
 
     private void execute() throws ExecutionException, InterruptedException {
         logger.debug("executing (queue={})", getQueue().size());
-        new SimplePipelineExecutor<SettingsPipelineRequest, Pipeline<SettingsPipelineRequest>>(executorService).setQueue(getQueue()).setPipelineProvider(pipelineProvider()).prepare().execute().waitFor();
+        new SimplePipelineExecutor<SettingAndSyncTaskDTOPipelineRequest, Pipeline<SettingAndSyncTaskDTOPipelineRequest>>(executorService).setQueue(getQueue()).setPipelineProvider(pipelineProvider()).prepare().execute().waitFor();
         logger.debug("execution completed");
     }
 

@@ -64,7 +64,7 @@ public class SyncTaskDTO {
         SyncTaskDO taskDo = syncTaskDao.findTaskByIndexAndType(index, type);
         SyncTaskStateDO stateDo = taskDo.getSyncTaskState();
         SyncTaskStateDTO stateDTO = new SyncTaskStateDTO(syncTaskStateDao);
-        stateDTO.setTaskId(taskDo.getId());
+        stateDTO.setSyncTaskDO(taskDo);
         if (stateDo != null) {
             stateDTO.setId(stateDo.getId());
             stateDTO.setIsCanceled(stateDo.getIsCanceled());

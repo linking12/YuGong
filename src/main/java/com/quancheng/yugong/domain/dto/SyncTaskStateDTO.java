@@ -23,10 +23,10 @@ public class SyncTaskStateDTO {
 
     private final SyncTaskStateDao syncTaskStateDao;
     private Integer                id;
-    private Integer                taskId;
+    private SyncTaskDO             syncTaskDO;
     private String                 stateSetting;
     private Boolean                isDeleted;
-    private Boolean                isCanceled;
+    private Boolean                isCanceled = Boolean.FALSE;
 
     public SyncTaskStateDTO(SyncTaskStateDao syncTaskStateDao){
         this.syncTaskStateDao = syncTaskStateDao;
@@ -45,9 +45,7 @@ public class SyncTaskStateDTO {
             stateDo.setIsCanceled(this.isCanceled);
             stateDo.setIsCanceled(this.isCanceled);
             stateDo.setStateSetting(stateSetting);
-            SyncTaskDO taskDo = new SyncTaskDO();
-            taskDo.setId(taskId);
-            stateDo.setSyncTask(taskDo);
+            stateDo.setSyncTask(syncTaskDO);
         }
         SyncTaskStateDO savedStatedDo = syncTaskStateDao.save(stateDo);
         this.id = savedStatedDo.getId();
@@ -90,12 +88,12 @@ public class SyncTaskStateDTO {
         this.id = id;
     }
 
-    public Integer getTaskId() {
-        return taskId;
+    public SyncTaskDO getSyncTaskDO() {
+        return syncTaskDO;
     }
 
-    public void setTaskId(Integer taskId) {
-        this.taskId = taskId;
+    public void setSyncTaskDO(SyncTaskDO syncTaskDO) {
+        this.syncTaskDO = syncTaskDO;
     }
 
     public String getStateSetting() {

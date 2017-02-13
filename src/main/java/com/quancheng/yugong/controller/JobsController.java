@@ -13,10 +13,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
 
+import com.google.gson.Gson;
 import com.quancheng.yugong.service.SyncTaskService;
 import com.quancheng.yugong.vo.SyncTaskVO;
 
@@ -31,8 +32,13 @@ public class JobsController {
     private SyncTaskService syncTaskService;
 
     @RequestMapping(value = "/jobs", method = RequestMethod.GET)
-    public ModelAndView index(@PageableDefault(value = 15, sort = { "id" }, direction = Sort.Direction.DESC) Pageable pageable) {
+    public String index(Model model,
+                        @PageableDefault(value = 15, sort = { "id" }, direction = Sort.Direction.DESC) Pageable pageable) {
         Page<SyncTaskVO> tasks = syncTaskService.queryAll(pageable);
-        return new ModelAndView("/task/tasks");
+        PageWrapper<SyncTaskVO> page = new PageWrapper<SyncTaskVO>(tasks, "/jobs");
+        System.out.println(new Gson().toJson(page));
+        model.addAttribute("jobs", page.getContent());
+        model.addAttribute("page", page);
+        return "/task/tasks";
     }
 }

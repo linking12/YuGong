@@ -63,4 +63,3 @@
 
 <script src="/js/plugins/select/bootstrap-select.min.js"></script>
 <script src="/js/plugins/highcharts/highcharts-4.1.8.js"></script>
-<script src="/js/lts.js"></script>

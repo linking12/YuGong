@@ -5,7 +5,7 @@
  * use it only in accordance with the terms of the license agreement you entered
  * into with Quancheng-ec.com.
  */
-package com.quancheng.yugong.domain.dto;
+package com.quancheng.yugong.dto;
 
 import static org.elasticsearch.common.settings.Settings.settingsBuilder;
 
@@ -64,7 +64,7 @@ public class SyncTaskDTO {
         SyncTaskDO taskDo = syncTaskDao.findTaskByIndexAndType(index, type);
         SyncTaskStateDO stateDo = taskDo.getSyncTaskState();
         SyncTaskStateDTO stateDTO = new SyncTaskStateDTO(syncTaskStateDao);
-        stateDTO.setSyncTaskDO(taskDo);
+        stateDTO.setTaskId(taskDo.getId());
         if (stateDo != null) {
             stateDTO.setId(stateDo.getId());
             stateDTO.setIsCanceled(stateDo.getIsCanceled());

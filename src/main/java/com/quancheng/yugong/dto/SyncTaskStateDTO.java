@@ -5,7 +5,7 @@
  * use it only in accordance with the terms of the license agreement you entered
  * into with Quancheng-ec.com.
  */
-package com.quancheng.yugong.domain.dto;
+package com.quancheng.yugong.dto;
 
 import static org.elasticsearch.common.settings.Settings.settingsBuilder;
 
@@ -23,7 +23,7 @@ public class SyncTaskStateDTO {
 
     private final SyncTaskStateDao syncTaskStateDao;
     private Integer                id;
-    private SyncTaskDO             syncTaskDO;
+    private Integer                taskId;
     private String                 stateSetting;
     private Boolean                isDeleted;
     private Boolean                isCanceled = Boolean.FALSE;
@@ -45,6 +45,8 @@ public class SyncTaskStateDTO {
             stateDo.setIsCanceled(this.isCanceled);
             stateDo.setIsCanceled(this.isCanceled);
             stateDo.setStateSetting(stateSetting);
+            SyncTaskDO syncTaskDO = new SyncTaskDO();
+            syncTaskDO.setId(this.taskId);
             stateDo.setSyncTask(syncTaskDO);
         }
         SyncTaskStateDO savedStatedDo = syncTaskStateDao.save(stateDo);
@@ -88,12 +90,12 @@ public class SyncTaskStateDTO {
         this.id = id;
     }
 
-    public SyncTaskDO getSyncTaskDO() {
-        return syncTaskDO;
+    public Integer getTaskId() {
+        return taskId;
     }
 
-    public void setSyncTaskDO(SyncTaskDO syncTaskDO) {
-        this.syncTaskDO = syncTaskDO;
+    public void setTaskId(Integer taskId) {
+        this.taskId = taskId;
     }
 
     public String getStateSetting() {

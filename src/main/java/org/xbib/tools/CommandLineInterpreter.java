@@ -17,7 +17,7 @@ package org.xbib.tools;
 
 import java.io.InputStream;
 
-import com.quancheng.yugong.domain.dto.SyncTaskDTO;
+import com.quancheng.yugong.dto.SyncTaskDTO;
 
 public interface CommandLineInterpreter {
 

@@ -21,7 +21,7 @@ import org.xbib.tools.JDBCImporter;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.quancheng.yugong.domain.dto.SyncTaskDTO;
+import com.quancheng.yugong.dto.SyncTaskDTO;
 import com.quancheng.yugong.repository.DistributedLock;
 import com.quancheng.yugong.repository.SyncTaskDao;
 import com.quancheng.yugong.repository.SyncTaskStateDao;

@@ -47,7 +47,7 @@ import org.xbib.elasticsearch.jdbc.strategy.Context;
 import org.xbib.elasticsearch.jdbc.strategy.JDBCSource;
 import org.xbib.elasticsearch.jdbc.strategy.Sink;
 
-import com.quancheng.yugong.domain.dto.SyncTaskDTO;
+import com.quancheng.yugong.dto.SyncTaskDTO;
 
 /**
  * The context consists of the parameters that span source and sink settings. It represents the state, for supporting

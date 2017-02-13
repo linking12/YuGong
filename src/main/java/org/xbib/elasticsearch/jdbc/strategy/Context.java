@@ -17,7 +17,7 @@ package org.xbib.elasticsearch.jdbc.strategy;
 
 import org.elasticsearch.common.settings.Settings;
 
-import com.quancheng.yugong.domain.dto.SyncTaskDTO;
+import com.quancheng.yugong.dto.SyncTaskDTO;
 
 public interface Context<S extends Source, T extends Sink> {
 

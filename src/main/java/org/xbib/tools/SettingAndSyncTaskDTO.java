@@ -9,7 +9,7 @@ package org.xbib.tools;
 
 import org.elasticsearch.common.settings.Settings;
 
-import com.quancheng.yugong.domain.dto.SyncTaskDTO;
+import com.quancheng.yugong.dto.SyncTaskDTO;
 
 /**
  * @author shimingliu 2017年2月12日 下午10:56:59

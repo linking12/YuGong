@@ -48,8 +48,8 @@ import org.xbib.pipeline.Pipeline;
 import org.xbib.pipeline.PipelineProvider;
 import org.xbib.pipeline.SimplePipelineExecutor;
 
-import com.quancheng.yugong.domain.dto.SyncTaskDTO;
-import com.quancheng.yugong.domain.dto.SyncTaskStateDTO;
+import com.quancheng.yugong.dto.SyncTaskDTO;
+import com.quancheng.yugong.dto.SyncTaskStateDTO;
 
 public class JDBCImporter extends AbstractPipeline<SettingAndSyncTaskDTOPipelineRequest> implements Runnable, CommandLineInterpreter {
 

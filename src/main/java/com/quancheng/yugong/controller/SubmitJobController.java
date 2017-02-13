@@ -29,7 +29,8 @@ public class SubmitJobController {
 
     @RequestMapping(value = "/addJob", method = RequestMethod.GET)
     public ModelAndView index() {
-        return new ModelAndView("/task/task");
+        throw new NullPointerException("test");
+        // return new ModelAndView("/task/task");
     }
 
     @RequestMapping(value = "/submitJob", method = RequestMethod.POST)

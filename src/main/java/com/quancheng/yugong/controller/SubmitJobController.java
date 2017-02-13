@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.quancheng.yugong.service.SyncTaskService;
@@ -34,14 +35,16 @@ public class SubmitJobController {
     }
 
     @RequestMapping(value = "/submitJob", method = RequestMethod.POST)
-    public String sayHello(@ModelAttribute String setting) {
+    public String submitJob(@ModelAttribute("setting") String setting) {
         try {
-            new JsonParser().parse(setting);
+            JsonObject settingJson = new JsonParser().parse(setting).getAsJsonObject();
+            String settingCopy = settingJson.toString();
+            Boolean success = syncTaskService.submitSyncTask(settingCopy);
+            if (success) return "redirect:/jobs ";
+            else throw new IllegalArgumentException("save config to data base failed");
         } catch (JsonSyntaxException e) {
             throw e;
         }
-        Boolean success = syncTaskService.submitSyncTask(setting);
-        if (success) return "redirect:/jobs ";
-        else throw new IllegalArgumentException("save config to data base failed");
+
     }
 }

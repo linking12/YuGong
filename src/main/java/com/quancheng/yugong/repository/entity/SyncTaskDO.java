@@ -31,6 +31,9 @@ public class SyncTaskDO extends BaseDO {
     @Column(name = "es_type")
     private String          type;
 
+    @Column(name = "excute_machine")
+    private String          excuteNode;
+
     @Lob
     @Column(name = "sync_setting")
     private String          setting;
@@ -70,10 +73,18 @@ public class SyncTaskDO extends BaseDO {
         this.syncTaskState = syncTaskState;
     }
 
+    public String getExcuteNode() {
+        return excuteNode;
+    }
+
+    public void setExcuteNode(String excuteNode) {
+        this.excuteNode = excuteNode;
+    }
+
     @Override
     public String toString() {
-        return "SyncTaskDO [index=" + index + ", type=" + type + ", setting=" + setting + ", syncTaskState="
-               + syncTaskState + "]";
+        return "SyncTaskDO [index=" + index + ", type=" + type + ", excuteNode=" + excuteNode + ", setting=" + setting
+               + ", syncTaskState=" + syncTaskState + "]";
     }
 
 }

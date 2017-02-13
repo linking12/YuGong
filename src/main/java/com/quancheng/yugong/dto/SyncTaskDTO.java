@@ -9,6 +9,9 @@ package com.quancheng.yugong.dto;
 
 import static org.elasticsearch.common.settings.Settings.settingsBuilder;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.elasticsearch.common.settings.Settings;
 
 import com.google.gson.JsonObject;
@@ -44,11 +47,21 @@ public class SyncTaskDTO {
         this.syncTaskStateDao = syncTaskStateDao;
     }
 
+    private String getLocalHost() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public boolean save() {
         SyncTaskDO taskDo = new SyncTaskDO();
         taskDo.setIndex(index);
         taskDo.setType(type);
         taskDo.setSetting(setting);
+        taskDo.setExcuteNode(getLocalHost());
         return syncTaskDao.save(taskDo).getId() != 0;
     }
 

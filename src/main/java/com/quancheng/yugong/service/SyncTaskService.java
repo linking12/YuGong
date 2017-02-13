@@ -7,6 +7,11 @@
  */
 package com.quancheng.yugong.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.quancheng.yugong.vo.SyncTaskVO;
+
 /**
  * @author shimingliu 2017年2月10日 上午11:37:20
  * @version SyncTaskService.java, v 0.0.1 2017年2月10日 上午11:37:20 shimingliu
@@ -18,5 +23,7 @@ public interface SyncTaskService {
     public Boolean cancelSyncTask(String index, String type);
 
     public Boolean querySyncTask(String index, String type);
+
+    public Page<SyncTaskVO> queryAll(Pageable pageable);
 
 }

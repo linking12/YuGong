@@ -7,10 +7,18 @@
  */
 package com.quancheng.yugong.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.quancheng.yugong.service.SyncTaskService;
+import com.quancheng.yugong.vo.SyncTaskVO;
 
 /**
  * @author shimingliu 2017年2月13日 下午4:01:25
@@ -19,8 +27,12 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class JobsController {
 
+    @Autowired
+    private SyncTaskService syncTaskService;
+
     @RequestMapping(value = "/jobs", method = RequestMethod.GET)
-    public ModelAndView index() {
+    public ModelAndView index(@PageableDefault(value = 15, sort = { "id" }, direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<SyncTaskVO> tasks = syncTaskService.queryAll(pageable);
         return new ModelAndView("/task/tasks");
     }
 }

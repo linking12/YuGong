@@ -9,6 +9,7 @@ package com.quancheng.yugong.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +17,9 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.xbib.tools.JDBCImporter;
 
@@ -27,6 +31,7 @@ import com.quancheng.yugong.repository.SyncTaskDao;
 import com.quancheng.yugong.repository.SyncTaskStateDao;
 import com.quancheng.yugong.repository.entity.SyncTaskDO;
 import com.quancheng.yugong.repository.entity.SyncTaskStateDO;
+import com.quancheng.yugong.vo.SyncTaskVO;
 
 /**
  * @author shimingliu 2017年2月10日 下午5:15:17
@@ -51,6 +56,8 @@ public class SyncTaskServiceImpl implements SyncTaskService {
     private Map<String, JDBCImporter>      runningImporters     = Maps.newConcurrentMap();
 
     private final ScheduledExecutorService scheuledScanShutDown = Executors.newScheduledThreadPool(1);
+
+    private final ExecutorService          jdbcSyncThreadPool   = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     @Autowired
     public void init() {
@@ -84,7 +91,13 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         synchronized (lock) {
             boolean savedSuccess = syncTaskDTO.save();
             if (savedSuccess) {
-                runTask(syncTaskDTO);
+                jdbcSyncThreadPool.submit(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        runTask(syncTaskDTO);
+                    }
+                });
                 return true;
             }
             return false;
@@ -111,6 +124,32 @@ public class SyncTaskServiceImpl implements SyncTaskService {
     @Override
     public Boolean querySyncTask(String index, String type) {
         return null;
+    }
+
+    @Override
+    public Page<SyncTaskVO> queryAll(Pageable pageable) {
+        Page<SyncTaskDO> syncTaskDoList = taskDao.findAll(pageable);
+        Page<SyncTaskVO> syncTaskVoList = syncTaskDoList.map(new Converter<SyncTaskDO, SyncTaskVO>() {
+
+            @Override
+            public SyncTaskVO convert(SyncTaskDO source) {
+                SyncTaskVO syncTaskVo = new SyncTaskVO();
+                syncTaskVo.setCreateTime(source.getCreateTime());
+                syncTaskVo.setId(source.getId());
+                syncTaskVo.setIndex(source.getIndex());
+                syncTaskVo.setType(source.getType());
+                syncTaskVo.setSourceSetting(source.getSetting());
+                syncTaskVo.setExcuteNode(source.getExcuteNode());
+                SyncTaskStateDO stateDO = source.getSyncTaskState();
+                if (stateDO != null) {
+                    syncTaskVo.setStateSetting(stateDO.getStateSetting());
+                    syncTaskVo.setStateUpdateTime(stateDO.getUpdateTime());
+                }
+                return syncTaskVo;
+            }
+
+        });
+        return syncTaskVoList;
     }
 
     private void runTask(SyncTaskDTO syncTaskDTO) {

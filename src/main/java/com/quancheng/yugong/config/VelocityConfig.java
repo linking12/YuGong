@@ -11,8 +11,8 @@ import org.springframework.boot.autoconfigure.velocity.VelocityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.quancheng.yugong.velocity.EmbeddedVelocityLayoutView;
-import com.quancheng.yugong.velocity.EmbeddedVelocityLayoutViewResolver;
+import com.quancheng.yugong.common.EmbeddedVelocityLayoutView;
+import com.quancheng.yugong.common.EmbeddedVelocityLayoutViewResolver;
 
 /**
  * @author shimingliu 2017年2月13日 下午3:38:08

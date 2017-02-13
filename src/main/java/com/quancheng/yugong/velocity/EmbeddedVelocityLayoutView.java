@@ -21,6 +21,7 @@ import java.util.Locale;
  * @author shimingliu 2017年2月13日 下午3:25:40
  * @version EmbeddedVelocityLayoutView.java, v 0.0.1 2017年2月13日 下午3:25:40 shimingliu
  */
+@SuppressWarnings("deprecation")
 public class EmbeddedVelocityLayoutView extends EmbeddedVelocityToolboxView {
 
     /**

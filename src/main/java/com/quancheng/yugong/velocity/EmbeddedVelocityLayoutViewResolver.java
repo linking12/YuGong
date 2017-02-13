@@ -8,7 +8,6 @@
 package com.quancheng.yugong.velocity;
 
 import org.springframework.boot.web.servlet.view.velocity.EmbeddedVelocityViewResolver;
-import org.springframework.boot.web.servlet.view.velocity.EmbeddedVelocityViewResolver;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 import org.springframework.web.servlet.view.velocity.VelocityLayoutView;
 
@@ -16,6 +15,7 @@ import org.springframework.web.servlet.view.velocity.VelocityLayoutView;
  * @author shimingliu 2017年2月13日 下午3:36:51
  * @version EmbeddedVelocityLayoutViewResolver.java, v 0.0.1 2017年2月13日 下午3:36:51 shimingliu
  */
+@SuppressWarnings({ "deprecation" })
 public class EmbeddedVelocityLayoutViewResolver extends EmbeddedVelocityViewResolver {
 
     private String layoutUrl;

@@ -18,6 +18,7 @@ import com.quancheng.yugong.velocity.EmbeddedVelocityLayoutViewResolver;
  * @author shimingliu 2017年2月13日 下午3:38:08
  * @version VelocityConfig.java, v 0.0.1 2017年2月13日 下午3:38:08 shimingliu
  */
+@SuppressWarnings("deprecation")
 @Configuration
 public class VelocityConfig {
 

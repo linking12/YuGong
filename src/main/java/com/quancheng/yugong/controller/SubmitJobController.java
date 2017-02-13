@@ -9,12 +9,13 @@ package com.quancheng.yugong.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.quancheng.yugong.service.SyncTaskService;
 
 /**
@@ -29,14 +30,18 @@ public class SubmitJobController {
 
     @RequestMapping(value = "/addJob", method = RequestMethod.GET)
     public ModelAndView index() {
-        throw new NullPointerException("test");
-        // return new ModelAndView("/task/task");
+        return new ModelAndView("/task/task");
     }
 
     @RequestMapping(value = "/submitJob", method = RequestMethod.POST)
-    public String sayHello(@ModelAttribute String setting, Model model) {
-        model.addAttribute("success", Boolean.TRUE);
-        syncTaskService.submitSyncTask(setting);
-        return "message";
+    public String sayHello(@ModelAttribute String setting) {
+        try {
+            new JsonParser().parse(setting);
+        } catch (JsonSyntaxException e) {
+            throw e;
+        }
+        Boolean success = syncTaskService.submitSyncTask(setting);
+        if (success) return "redirect:/jobs ";
+        else throw new IllegalArgumentException("save config to data base failed");
     }
 }

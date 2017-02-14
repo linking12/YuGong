@@ -7,7 +7,7 @@
         <h3><span class="text-navy">任务列表</span></h3> 
        </div> 
        <div class="ibox-content"> 
-        <table class="table table-stripped toggle-arrow-tiny footable" data-page-size="5"> 
+        <table class="table table-stripped toggle-arrow-tiny footable"> 
          <thead> 
           <tr> 
            <th data-hide="all">ID</th> 
@@ -40,7 +40,7 @@
               <button id="state_view_$job.id" class="btn btn-block btn-outline btn-rounded btn-info">查看</button>
             </td>
             <td>
-              <button id="oprate_$job.id" class="btn btn-block btn-outline btn-rounded btn-info">退出</button>
+              <button class="btn btn-block btn-outline btn-rounded btn-info cancel-job" id="$job.id">退出</button>
             </td>
           </tr> 
          #end 
@@ -102,7 +102,7 @@ $(document).ready(function () {
        jf.doFormat(json);
        $('#settingDialog').dialog( "open" );
     });
-     $(state_view).on( "click", function() {
+    $(state_view).on("click", function() {
           #if($job.stateSetting) 
            var options = {
                dom: '#settingDialog'
@@ -116,5 +116,8 @@ $(document).ready(function () {
           #end
     });
    #end 
+   $("button.cancel-job").on("click", function() {
+       self.location='/cancel/'+this.id; 
+    });
 });
 </script>

@@ -40,7 +40,7 @@ public class SubmitJobController {
             JsonObject settingJson = new JsonParser().parse(setting).getAsJsonObject();
             String settingCopy = settingJson.toString();
             Boolean success = syncTaskService.submitTask(settingCopy);
-            if (success) return "redirect:/jobs ";
+            if (success) return "redirect:/jobs";
             else throw new IllegalArgumentException("save config to data base failed");
         } catch (JsonSyntaxException e) {
             throw e;

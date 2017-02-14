@@ -86,11 +86,14 @@ public class TaskBizService {
         return Boolean.TRUE;
     }
 
-    public Boolean cancelTask(String index, String type) {
-        SyncTaskDO taskDo = taskDao.findTaskByIndexAndType(index, type);
+    public Boolean cancelTask(Integer taskId) {
+        SyncTaskDO taskDo = taskDao.findOne(taskId);
         SyncTaskStateDO taskState = taskDo.getSyncTaskState();
         taskState.setIsCanceled(true);
         stateDao.save(taskState);
+        SyncTaskDO taskDO = taskState.getSyncTask();
+        String index = taskDO.getIndex();
+        String type = taskDO.getType();
         taskLocalStoreService.delete(index, type);
         return true;
     }

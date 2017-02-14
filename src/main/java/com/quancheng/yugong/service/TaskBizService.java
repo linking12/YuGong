@@ -120,6 +120,7 @@ public class TaskBizService {
                 if (stateDO != null) {
                     syncTaskVo.setStateSetting(stateDO.getStateSetting());
                     syncTaskVo.setStateUpdateTime(stateDO.getUpdateTime());
+                    syncTaskVo.setIsCanceled(stateDO.getIsCanceled());
                 }
                 return syncTaskVo;
             }

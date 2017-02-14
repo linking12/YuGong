@@ -17,7 +17,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.gson.Gson;
 import com.quancheng.yugong.service.TaskBizService;
 import com.quancheng.yugong.vo.SyncTaskVO;
 
@@ -36,7 +35,6 @@ public class DeleteJobController {
                         @PageableDefault(value = 5, sort = { "id" }, direction = Sort.Direction.DESC) Pageable pageable) {
         Page<SyncTaskVO> tasks = syncTaskService.listAllTask(pageable);
         PageWrapper<SyncTaskVO> page = new PageWrapper<SyncTaskVO>(tasks, "/deleteJobs");
-        System.out.println(new Gson().toJson(page));
         model.addAttribute("jobs", page.getContent());
         model.addAttribute("page", page);
         return "/task/deletetasks";

@@ -16,6 +16,7 @@
            <th data-hide="all">执行机器</th> 
            <th data-hide="all">创建时间</th> 
            <th data-hide="all">最新执行时间</th> 
+           <th data-hide="all">是否已退出</th> 
            <th data-hide="all">原始配置</th> 
            <th data-hide="all">状态配置</th> 
            <th data-hide="all">操作</th> 
@@ -30,6 +31,7 @@
             <td>$job.excuteNode</td>
             <td>$job.createTime</td>
             <td>#if($job.stateUpdateTime)$job.stateUpdateTime#end</td>
+            <td>#if($null.isNull($job.isCanceled)) #else $job.isCanceled #end</td>
             <td>
               <button id="source_view_$job.id" class="btn btn-block btn-outline btn-rounded btn-info">查看</button>
              </div>

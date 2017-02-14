@@ -171,9 +171,14 @@ public class SyncTaskServiceImpl implements SyncTaskService {
     private void cancelTask(String taskKey) {
         if (runningImporters.containsKey(taskKey)) {
             try {
-                runningImporters.get(taskKey).shutdown();
-                distributedLock.release(taskKey);
-                runningImporters.remove(taskKey);
+                JDBCImporter importer = runningImporters.get(taskKey);
+                try {
+                    importer.shutdown();
+                } finally {
+                    distributedLock.release(taskKey);
+                    runningImporters.remove(taskKey);
+                    importer = null;// set to null for gc
+                }
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }

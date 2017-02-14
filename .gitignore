@@ -1,5 +1,12 @@
 /.gradle/
-/bin/
+/bin/com/
+/bin/log*
+/bin/META-INF/
+/bin/org/
+/bin/public/
+/bin/templates/
+/bin/appli*
+/bin/WEB-INF
 /.settings/
 /.project
 /.classpath

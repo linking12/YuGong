@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -38,5 +39,11 @@ public class DeleteJobController {
         model.addAttribute("jobs", page.getContent());
         model.addAttribute("page", page);
         return "/task/deletetasks";
+    }
+    
+    @RequestMapping(value = "/delete/{taskId}", method = RequestMethod.GET)
+    public String cancel(@PathVariable Integer taskId) {
+        syncTaskService.deleteTask(taskId);
+        return "redirect:/deleteJobs";
     }
 }

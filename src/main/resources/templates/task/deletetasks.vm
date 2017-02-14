@@ -38,7 +38,7 @@
               <button id="state_view_$job.id" class="btn btn-block btn-outline btn-rounded btn-info">查看</button>
             </td>
             <td>
-              <button id="oprate_$job.id" class="btn btn-block btn-outline btn-rounded btn-info">删除</button>
+              <button id="$job.id" class="btn btn-block btn-outline btn-rounded btn-info delete-job">删除</button>
             </td>
           </tr> 
          #end 
@@ -114,5 +114,8 @@ $(document).ready(function () {
           #end
     });
    #end 
+   $("button.delete-job").on("click", function() {
+       self.location='/delete/'+this.id; 
+    });
 });
 </script>

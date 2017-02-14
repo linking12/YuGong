@@ -115,7 +115,9 @@ $(document).ready(function () {
     });
    #end 
    $("button.delete-job").on("click", function() {
-       self.location='/delete/'+this.id; 
+       if(confirm('Elasticsearch 上的索引删除了吗，如没有，请上http://es.dev.quancheng-ec.com/删除?')){
+          self.location='/delete/'+this.id; 
+       }
     });
 });
 </script>

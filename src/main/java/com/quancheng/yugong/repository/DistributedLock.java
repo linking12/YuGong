@@ -9,7 +9,6 @@ package com.quancheng.yugong.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.quancheng.yugong.repository.entity.SyncTaskDO;
@@ -21,9 +20,15 @@ import com.quancheng.yugong.repository.entity.SyncTaskDO;
 @Repository
 public interface DistributedLock extends PagingAndSortingRepository<SyncTaskDO, Integer> {
 
-    @Query(value = "SELECT GET_LOCK(:key, :timeOut)", nativeQuery = true)
-    Integer getLock(@Param("key") String key, @Param("timeOut") Integer timeOut);
+    /**
+     * <pre>
+     * SELECT GET_LOCK('saluki_monitor', 0);
+     * SELECT RELEASE_LOCK('saluki_monitor');
+     * </pre>
+     */
+    @Query(value = "SELECT GET_LOCK(?1, ?2)", nativeQuery = true)
+    Integer getLock(String key, Integer timeOut);
 
-    @Query(value = "SELECT GET_LOCK(:key)", nativeQuery = true)
-    Integer release(@Param("key") String key);
+    @Query(value = "SELECT RELEASE_LOCK(?1)", nativeQuery = true)
+    Integer release(String key);
 }

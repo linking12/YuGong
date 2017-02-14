@@ -107,13 +107,21 @@ public class SyncTaskServiceImpl implements SyncTaskService {
             taskDo.setExcuteNode(getLocalHost());
             Boolean savedSuccess = taskDao.save(taskDo).getId() != 0;
             if (savedSuccess) {
-                jdbcSyncThreadPool.submit(new Runnable() {
+                String key = buildKey(syncTaskDTO.getIndex(), syncTaskDTO.getType());
+                Integer locked = distributedLock.getLock(key, 0);
+                if (locked == 1) {
+                    jdbcSyncThreadPool.submit(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        runTask(syncTaskDTO);
-                    }
-                });
+                        @Override
+                        public void run() {
+                            JDBCImporter jdbcImporter = new JDBCImporter();
+                            jdbcImporter.run(syncTaskDTO);
+                            runningImporters.put(key, jdbcImporter);
+                        }
+                    });
+                } else {
+                    throw new RuntimeException(String.format("this index-type %s is running in other machine", key));
+                }
                 return true;
             }
             return false;
@@ -168,24 +176,8 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         return syncTaskVoList;
     }
 
-    private void runTask(SyncTaskDTO syncTaskDTO) {
-        String key = buildKey(syncTaskDTO.getIndex(), syncTaskDTO.getType());
-        try {
-            Integer locked = distributedLock.getLock(key, 0);
-            if (locked == 1) {
-                JDBCImporter jdbcImporter = new JDBCImporter();
-                jdbcImporter.run(syncTaskDTO);
-                runningImporters.put(key, jdbcImporter);
-            }
-        } catch (Throwable e) {
-            logger.error(e.getMessage(), e);
-            distributedLock.release(key);
-        }
-
-    }
-
     private String buildKey(String index, String type) {
-        return index + "_" + type;
+        return index + "-" + type;
     }
 
 }

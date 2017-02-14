@@ -317,7 +317,7 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
 
     private ClientAPI createClient(Settings settings) {
         String clusterName = System.getProperty("ELASTICSEARCH_CLUSTER","es");
-        String clusterHost = System.getProperty("ELASTICSEARCH_CLUSTER_HOST","10.42.107.221");
+        String clusterHost = System.getProperty("ELASTICSEARCH_CLUSTER_HOST","10.42.61.41");
         String[] clusterHosts = StringUtils.split(clusterHost, ",");
         Settings.Builder settingsBuilder = Settings.settingsBuilder()
                 .put("cluster.name", settings.get("elasticsearch.cluster.name", settings.get("elasticsearch.cluster", clusterName)))

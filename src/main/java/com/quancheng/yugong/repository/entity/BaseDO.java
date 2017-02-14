@@ -32,22 +32,11 @@ public abstract class BaseDO {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "is_deleted")
-    private Boolean isDeleted = false;
-
     @Column(name = "creat_time")
     private Date    createTime;
 
     @Column(name = "update_time")
     private Date    updateTime;
-
-    public Boolean getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Boolean isDeleted) {
-        this.isDeleted = isDeleted;
-    }
 
     public Date getCreateTime() {
         return createTime;
@@ -91,8 +80,7 @@ public abstract class BaseDO {
 
     @Override
     public String toString() {
-        return "BaseDO [id=" + id + ", isDeleted=" + isDeleted + ", createTime=" + createTime + ", updateTime="
-               + updateTime + "]";
+        return "BaseDO [id=" + id + ", createTime=" + createTime + ", updateTime=" + updateTime + "]";
     }
 
 }

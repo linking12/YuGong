@@ -9,9 +9,6 @@ package com.quancheng.yugong.dto;
 
 import static org.elasticsearch.common.settings.Settings.settingsBuilder;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 import org.elasticsearch.common.settings.Settings;
 
 import com.google.gson.JsonObject;
@@ -63,7 +60,6 @@ public class SyncTaskDTO {
         if (stateDo != null) {
             stateDTO.setId(stateDo.getId());
             stateDTO.setIsCanceled(stateDo.getIsCanceled());
-            stateDTO.setIsDeleted(stateDo.getIsDeleted());
             stateDTO.setStateSetting(stateDo.getStateSetting());
         }
         return stateDTO;

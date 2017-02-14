@@ -68,16 +68,15 @@ public class SyncTaskServiceImpl implements SyncTaskService {
             @Override
             public void run() {
                 try {
-                    List<String> toDeleted = Lists.newArrayList();
+                    List<String> taskKeytoDeleted = Lists.newArrayList();
                     for (Map.Entry<String, JDBCImporter> entry : runningImporters.entrySet()) {
                         JDBCImporter importer = entry.getValue();
                         if (importer.isShutdown()) {
-                            toDeleted.add(entry.getKey());
-                            importer.shutdown();
+                            taskKeytoDeleted.add(entry.getKey());
                         }
                     }
-                    for (String indexType : toDeleted) {
-                        runningImporters.remove(indexType);
+                    for (String taskKey : taskKeytoDeleted) {
+                        cancelTask(taskKey);
                     }
                 } catch (Throwable e) {
                     logger.error(e.getMessage(), e);
@@ -134,20 +133,9 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         SyncTaskStateDO taskState = taskDo.getSyncTaskState();
         taskState.setIsCanceled(true);
         stateDao.save(taskState);
-        String key = this.buildKey(index, type);
-        if (runningImporters.containsKey(key)) {
-            try {
-                runningImporters.get(key).shutdown();
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
+        String taskKey = this.buildKey(index, type);
+        cancelTask(taskKey);
         return true;
-    }
-
-    @Override
-    public Boolean querySyncTask(String index, String type) {
-        return null;
     }
 
     @Override
@@ -178,6 +166,18 @@ public class SyncTaskServiceImpl implements SyncTaskService {
 
     private String buildKey(String index, String type) {
         return index + "-" + type;
+    }
+
+    private void cancelTask(String taskKey) {
+        if (runningImporters.containsKey(taskKey)) {
+            try {
+                runningImporters.get(taskKey).shutdown();
+                distributedLock.release(taskKey);
+                runningImporters.remove(taskKey);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
     }
 
 }

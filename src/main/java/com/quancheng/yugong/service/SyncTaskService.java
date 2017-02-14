@@ -22,8 +22,6 @@ public interface SyncTaskService {
 
     public Boolean cancelSyncTask(String index, String type);
 
-    public Boolean querySyncTask(String index, String type);
-
     public Page<SyncTaskVO> queryAll(Pageable pageable);
 
 }

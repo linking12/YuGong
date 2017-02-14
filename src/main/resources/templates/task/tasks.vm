@@ -31,15 +31,14 @@
             <td>#if($job.stateUpdateTime)$job.stateUpdateTime#end</td>
             <td>
               <button id="source_view_$job.id" class="btn btn-block btn-outline btn-rounded btn-info">查看</button>
-              <div class="panel panel-info" id="source_setting_$job.id">
              </div>
             </td>
             <td>
               <button id="state_view_$job.id" class="btn btn-block btn-outline btn-rounded btn-info">查看</button>
-              <div id="state_setting_$job.id"></div>
             </td>
           </tr> 
          #end 
+         <div class="panel panel-info" id="settingDialog">
          </tbody> 
         </table> 
         <div class="paginationbar"> 
@@ -84,29 +83,31 @@
   </div> 
 <script>
 $(document).ready(function () {
+   $('#settingDialog').dialog({autoOpen: false,minWidth: 600,show: {effect: "blind",duration: 1000},hide: {effect: "explode",duration: 1000}});
    #foreach($job in $jobs) 
-    var container = '#source_setting_'+$job.id;
-    var veiwContainer = '#source_view_'+$job.id;
-    var options = {
-        dom: container
-    };
-    var json = $job.sourceSetting;
-    var jf = new JsonFormater(options);
-    jf.doFormat(json);
-    $(container).dialog({
-      autoOpen: false,
-      minWidth: 600,
-      show: {
-        effect: "blind",
-        duration: 1000
-      },
-      hide: {
-        effect: "explode",
-        duration: 1000
-      }
+    var source_view = '#source_view_'+$job.id;
+    var state_view = '#state_view_'+$job.id;
+    $(source_view).on( "click", function() {
+       var options = {
+           dom: '#settingDialog'
+       };
+       var json = $job.sourceSetting;
+       var jf = new JsonFormater(options);
+       jf.doFormat(json);
+       $('#settingDialog').dialog( "open" );
     });
-    $(veiwContainer).on( "click", function() {
-      $(container).dialog( "open" );
+     $(state_view).on( "click", function() {
+          #if($job.stateSetting) 
+           var options = {
+               dom: '#settingDialog'
+           };
+	       var json = $job.stateSetting;
+	       var jf = new JsonFormater(options);
+	       jf.doFormat(json);
+	       $('#settingDialog').dialog( "open" );
+	      #else
+	       alert("任务未执行，没有最新状态数据");
+          #end
     });
    #end 
 });

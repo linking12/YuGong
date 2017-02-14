@@ -7,6 +7,8 @@
  */
 package com.quancheng.yugong.service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -85,11 +87,25 @@ public class SyncTaskServiceImpl implements SyncTaskService {
         }, 0, 30, TimeUnit.MINUTES);
     }
 
+    private String getLocalHost() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public Boolean submitSyncTask(String syncSetting) {
         SyncTaskDTO syncTaskDTO = new SyncTaskDTO(syncSetting, taskDao, stateDao);
         synchronized (lock) {
-            boolean savedSuccess = syncTaskDTO.save();
+            SyncTaskDO taskDo = new SyncTaskDO();
+            taskDo.setIndex(syncTaskDTO.getIndex());
+            taskDo.setType(syncTaskDTO.getType());
+            taskDo.setSetting(syncTaskDTO.getSetting());
+            taskDo.setExcuteNode(getLocalHost());
+            Boolean savedSuccess = taskDao.save(taskDo).getId() != 0;
             if (savedSuccess) {
                 jdbcSyncThreadPool.submit(new Runnable() {
 

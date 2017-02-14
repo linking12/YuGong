@@ -47,24 +47,6 @@ public class SyncTaskDTO {
         this.syncTaskStateDao = syncTaskStateDao;
     }
 
-    private String getLocalHost() {
-        try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public boolean save() {
-        SyncTaskDO taskDo = new SyncTaskDO();
-        taskDo.setIndex(index);
-        taskDo.setType(type);
-        taskDo.setSetting(setting);
-        taskDo.setExcuteNode(getLocalHost());
-        return syncTaskDao.save(taskDo).getId() != 0;
-    }
-
     public String getSetting() {
         return this.setting;
     }

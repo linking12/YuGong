@@ -85,7 +85,9 @@ public class TaskexecuteService {
         Iterator<SyncTaskDO> it = tasks.iterator();
         while (it.hasNext()) {
             SyncTaskDO taskDo = it.next();
-            saveAndRunTask(taskDo.getSetting());
+            if (!taskDo.getSyncTaskState().getIsCanceled()) {
+                saveAndRunTask(taskDo.getSetting());
+            }
         }
     }
 

@@ -17,7 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.quancheng.yugong.service.SyncTaskService;
+import com.quancheng.yugong.service.TaskBizService;
 
 /**
  * @author shimingliu 2017年2月13日 下午3:47:09
@@ -27,7 +27,7 @@ import com.quancheng.yugong.service.SyncTaskService;
 public class SubmitJobController {
 
     @Autowired
-    private SyncTaskService syncTaskService;
+    private TaskBizService syncTaskService;
 
     @RequestMapping(value = "/addJob", method = RequestMethod.GET)
     public ModelAndView index() {

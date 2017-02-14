@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.gson.Gson;
-import com.quancheng.yugong.service.SyncTaskService;
+import com.quancheng.yugong.service.TaskBizService;
 import com.quancheng.yugong.vo.SyncTaskVO;
 
 /**
@@ -29,7 +29,7 @@ import com.quancheng.yugong.vo.SyncTaskVO;
 public class JobsController {
 
     @Autowired
-    private SyncTaskService syncTaskService;
+    private TaskBizService syncTaskService;
 
     @RequestMapping(value = "/jobs", method = RequestMethod.GET)
     public String index(Model model,

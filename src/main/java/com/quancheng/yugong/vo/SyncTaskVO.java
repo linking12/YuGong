@@ -31,6 +31,8 @@ public class SyncTaskVO {
 
     private Date    stateUpdateTime;
 
+    private Boolean isCanceled;
+
     public Integer getId() {
         return id;
     }
@@ -93,6 +95,14 @@ public class SyncTaskVO {
 
     public void setStateUpdateTime(Date stateUpdateTime) {
         this.stateUpdateTime = stateUpdateTime;
+    }
+
+    public Boolean getIsCanceled() {
+        return isCanceled;
+    }
+
+    public void setIsCanceled(Boolean isCanceled) {
+        this.isCanceled = isCanceled;
     }
 
 }

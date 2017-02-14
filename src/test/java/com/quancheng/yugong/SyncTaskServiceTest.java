@@ -14,7 +14,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import com.quancheng.yugong.service.SyncTaskService;
+import com.quancheng.yugong.service.TaskBizService;
 
 /**
  * @author shimingliu 2017年2月12日 下午8:22:35
@@ -26,7 +26,7 @@ import com.quancheng.yugong.service.SyncTaskService;
 public class SyncTaskServiceTest {
 
     @Autowired
-    private SyncTaskService taskService;
+    private TaskBizService taskService;
     
     
     private String sql = "SELECT *"

@@ -15,10 +15,10 @@
                 <a href="/addJob"><i class="fa fa-random"></i><span class="nav-label">添加任务</span></a>
             </li>
             <li>
-                <a href="/cancelJob"><i class="fa fa-file-text-o"></i> <span class="nav-label">退出任务</span></a>
+                <a href="/cancelJobs"><i class="fa fa-file-text-o"></i> <span class="nav-label">退出任务</span></a>
             </li>
             <li>
-                <a href="/deleteJob"><i class="fa fa-bar-chart"></i> <span class="nav-label">删除任务</span></a>
+                <a href="/deleteJobs"><i class="fa fa-bar-chart"></i> <span class="nav-label">删除任务</span></a>
             </li>
         </ul>
     </div>

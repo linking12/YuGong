@@ -7,10 +7,19 @@
  */
 package com.quancheng.yugong.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
+
+import com.google.gson.Gson;
+import com.quancheng.yugong.service.TaskBizService;
+import com.quancheng.yugong.vo.SyncTaskVO;
 
 /**
  * @author shimingliu 2017年2月13日 下午4:01:55
@@ -19,8 +28,17 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class DeleteJobController {
 
-    @RequestMapping(value = "/deleteJob", method = RequestMethod.GET)
-    public ModelAndView index() {
-        return new ModelAndView("/task/task");
+    @Autowired
+    private TaskBizService syncTaskService;
+
+    @RequestMapping(value = "/deleteJobs", method = RequestMethod.GET)
+    public String index(Model model,
+                        @PageableDefault(value = 5, sort = { "id" }, direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<SyncTaskVO> tasks = syncTaskService.queryAll(pageable);
+        PageWrapper<SyncTaskVO> page = new PageWrapper<SyncTaskVO>(tasks, "/deleteJobs");
+        System.out.println(new Gson().toJson(page));
+        model.addAttribute("jobs", page.getContent());
+        model.addAttribute("page", page);
+        return "/task/deletetasks";
     }
 }

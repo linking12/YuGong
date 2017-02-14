@@ -157,6 +157,6 @@ public class SyncTaskServiceTest {
 
     @Test
     public void submitTask() {
-        taskService.submitSyncTask(configSetting);
+        taskService.submitTask(configSetting);
     }
 }

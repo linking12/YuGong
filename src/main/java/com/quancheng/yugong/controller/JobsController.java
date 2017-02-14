@@ -34,7 +34,7 @@ public class JobsController {
     @RequestMapping(value = "/jobs", method = RequestMethod.GET)
     public String index(Model model,
                         @PageableDefault(value = 5, sort = { "id" }, direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<SyncTaskVO> tasks = syncTaskService.queryAll(pageable);
+        Page<SyncTaskVO> tasks = syncTaskService.listAllTask(pageable);
         PageWrapper<SyncTaskVO> page = new PageWrapper<SyncTaskVO>(tasks, "/jobs");
         System.out.println(new Gson().toJson(page));
         model.addAttribute("jobs", page.getContent());

@@ -46,7 +46,7 @@ public class TaskBizService {
     private TaskLocalStoregeService taskLocalStoreService;
 
     @Autowired
-    private TaskexecuteService         excutorTaskService;
+    private TaskexecuteService      excutorTaskService;
 
     private Object                  lock   = new Object();
 
@@ -59,7 +59,7 @@ public class TaskBizService {
         return null;
     }
 
-    public Boolean submitSyncTask(String syncSetting) {
+    public Boolean submitTask(String syncSetting) {
         SyncTaskDTO syncTaskDTO = new SyncTaskDTO(syncSetting, taskDao, stateDao);
         synchronized (lock) {
             String index = syncTaskDTO.getIndex();
@@ -86,7 +86,7 @@ public class TaskBizService {
         return Boolean.TRUE;
     }
 
-    public Boolean cancelSyncTask(String index, String type) {
+    public Boolean cancelTask(String index, String type) {
         SyncTaskDO taskDo = taskDao.findTaskByIndexAndType(index, type);
         SyncTaskStateDO taskState = taskDo.getSyncTaskState();
         taskState.setIsCanceled(true);
@@ -95,7 +95,15 @@ public class TaskBizService {
         return true;
     }
 
-    public Page<SyncTaskVO> queryAll(Pageable pageable) {
+    public void deleteTask(Integer taskId) {
+        SyncTaskDO taskDo = taskDao.findOne(taskId);
+        String index = taskDo.getIndex();
+        String type = taskDo.getType();
+        taskLocalStoreService.delete(index, type);
+        taskDao.delete(taskDo);
+    }
+
+    public Page<SyncTaskVO> listAllTask(Pageable pageable) {
         Page<SyncTaskDO> syncTaskDoList = taskDao.findAll(pageable);
         Page<SyncTaskVO> syncTaskVoList = syncTaskDoList.map(new Converter<SyncTaskDO, SyncTaskVO>() {
 

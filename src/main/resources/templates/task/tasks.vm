@@ -7,24 +7,39 @@
         <h3><span class="text-navy">任务添加</span></h3> 
        </div> 
        <div class="ibox-content"> 
-        <table class="table table-stripped toggle-arrow-tiny footable" data-page-size="10"> 
+        <table class="table table-stripped toggle-arrow-tiny footable" data-page-size="5"> 
          <thead> 
           <tr> 
-           <th data-toggle="true">任务ID</th> 
-           <th data-hide="all">提交节点组</th> 
-           <th data-hide="phone,tablet">重复时间间隔</th> 
-           <th data-hide="all">重复次数</th> 
-           <th data-hide="all">优先级</th> 
+           <th data-hide="all">ID</th> 
+           <th data-hide="all">索引名</th> 
+           <th data-hide="all">索引类型</th> 
+           <th data-hide="all">执行机器</th> 
+           <th data-hide="all">创建时间</th> 
+           <th data-hide="all">最新执行时间</th> 
+           <th data-hide="all">原始配置</th> 
+           <th data-hide="all">状态配置</th> 
           </tr> 
          </thead> 
          <tbody>
+         #foreach($job in $jobs) 
           <tr> 
-            <td>$page</td>
-            <td>12</td>
-            <td>12</td>
-            <td>12</td>
-            <td>12</td>
+            <td>$job.id</td>
+            <td>$job.index</td>
+            <td>$job.type</td>
+            <td>$job.excuteNode</td>
+            <td>$job.createTime</td>
+            <td>#if($job.stateUpdateTime)$job.stateUpdateTime#end</td>
+            <td>
+              <button id="source_view_$job.id" class="btn btn-block btn-outline btn-rounded btn-info">查看</button>
+              <div class="panel panel-info" id="source_setting_$job.id">
+             </div>
+            </td>
+            <td>
+              <button id="state_view_$job.id" class="btn btn-block btn-outline btn-rounded btn-info">查看</button>
+              <div id="state_setting_$job.id"></div>
+            </td>
           </tr> 
+         #end 
          </tbody> 
         </table> 
         <div class="paginationbar"> 
@@ -32,29 +47,32 @@
           #if($page.firstPage) 
           <li class="disabled"><a>首页</a></li> 
           #else 
-          <li><a href="$page.url">首页</a></li> 
+          <li><a href="$page.url?page=0&size=${page.size}">首页</a></li> 
           #end 
-          #if($!page.hasPreviousPage) 
+          #if(!$page.hasPreviousPage) 
           <li class="disabled"><a>&laquo;</a></li> 
           #else 
-          <li><a href="$page.url" class="active">&laquo;</a></li> 
+          #set($previousPage=$page.number - 1)  
+          <li><a href="$page.url?page=$previousPage&size=${page.size}" class="active">&laquo;</a></li> 
           #end 
           #foreach($item in $page.items) 
              #if($item.current) 
-	          <li class="disabled"><a>$${item.number}</a></li> 
+	          <li class="disabled"><a>${item.number}</a></li> 
 	         #else 
-	          <li><a href="$page.url">$${item.number}</a></li>
+	          #set($index=$item.number - 1)  
+	          <li><a href="$page.url?page=$index&size=${page.size}">${item.number}</a></li>
 	         #end 
 	      #end 
-	      #if($!page.hasNextPage) 
+	      #if(!$page.hasNextPage) 
 	          <li class="disabled"><a>&raquo;</a></li> 
 	      #else 
-	          <li><a href="$page.url">&raquo;</a></li> 
+	          <li><a href="$page.url?page=$page.number&size=${page.size}">&raquo;</a></li> 
 	      #end 
 	      #if($page.lastPage) 
 	          <li class="disabled"><a>末页</a></li>
 	      #else 
-	          <li><a href="$page.url">末页</a></li> 
+	          #set($lastPage=$item.number - 1)  
+	          <li><a href="$page.url?page=$lastPage&size=${page.size}">末页</a></li> 
 	      #end 
          </ul> 
         </div> 
@@ -64,3 +82,32 @@
     </div> 
    </div> 
   </div> 
+<script>
+$(document).ready(function () {
+   #foreach($job in $jobs) 
+    var container = '#source_setting_'+$job.id;
+    var veiwContainer = '#source_view_'+$job.id;
+    var options = {
+        dom: container
+    };
+    var json = $job.sourceSetting;
+    var jf = new JsonFormater(options);
+    jf.doFormat(json);
+    $(container).dialog({
+      autoOpen: false,
+      minWidth: 600,
+      show: {
+        effect: "blind",
+        duration: 1000
+      },
+      hide: {
+        effect: "explode",
+        duration: 1000
+      }
+    });
+    $(veiwContainer).on( "click", function() {
+      $(container).dialog( "open" );
+    });
+   #end 
+});
+</script>

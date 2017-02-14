@@ -24,3 +24,5 @@
 <script src="/js/bootstrap.min.js"></script>
 <script src="/js/date-util.js"></script>
 <script src="/js/jsonFormater.js"></script>
+<link href="/js/plugins/jqueryui/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+<script src="/js/plugins/jqueryui/jquery-ui-1.10.3.custom.min.js"></script>

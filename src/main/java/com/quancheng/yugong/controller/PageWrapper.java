@@ -18,7 +18,7 @@ import org.springframework.data.domain.Page;
  */
 public class PageWrapper<T> {
 
-    public static final int MAX_PAGE_ITEM_DISPLAY = 5;
+    public static final int MAX_PAGE_ITEM_DISPLAY = 15;
     private Page<T>         page;
     private List<PageItem>  items;
     private int             currentNumber;
@@ -36,9 +36,7 @@ public class PageWrapper<T> {
         this.page = page;
         this.url = url;
         items = new ArrayList<PageItem>();
-
         currentNumber = page.getNumber() + 1; // start from 1 to match page.page
-
         int start, size;
         if (page.getTotalPages() <= MAX_PAGE_ITEM_DISPLAY) {
             start = 1;
@@ -55,7 +53,6 @@ public class PageWrapper<T> {
                 size = MAX_PAGE_ITEM_DISPLAY;
             }
         }
-
         for (int i = 0; i < size; i++) {
             items.add(new PageItem(start + i, (start + i) == currentNumber));
         }

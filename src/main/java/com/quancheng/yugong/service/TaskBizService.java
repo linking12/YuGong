@@ -43,10 +43,10 @@ public class TaskBizService {
     private SyncTaskDao             taskDao;
 
     @Autowired
-    private TaskLocalStoregeService taskLocalStoreService;
+    private TaskLocalStoregeComponent taskLocalStoreService;
 
     @Autowired
-    private TaskexecuteService      excutorTaskService;
+    private TaskExecuteComponent      excutorTaskService;
 
     private Object                  lock   = new Object();
 

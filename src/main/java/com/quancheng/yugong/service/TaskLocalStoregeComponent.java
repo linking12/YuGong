@@ -17,7 +17,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.xbib.tools.JDBCImporter;
 
 import com.google.common.collect.Lists;
@@ -28,8 +28,8 @@ import com.quancheng.yugong.repository.DistributedLock;
  * @author shimingliu 2017年2月14日 下午4:46:37
  * @version TaskLoclStoregeService.java, v 0.0.1 2017年2月14日 下午4:46:37 shimingliu
  */
-@Service
-public class TaskLocalStoregeService {
+@Component
+public class TaskLocalStoregeComponent {
 
     private final static Logger                    logger                  = LogManager.getLogger("syncTaskService.default");
 

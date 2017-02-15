@@ -21,7 +21,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.xbib.tools.JDBCImporter;
 
 import com.quancheng.yugong.common.NamedThreadFactory;
@@ -34,8 +34,8 @@ import com.quancheng.yugong.repository.entity.SyncTaskDO;
  * @author shimingliu 2017年2月14日 下午4:41:38
  * @version RestartServiceImpl.java, v 0.0.1 2017年2月14日 下午4:41:38 shimingliu
  */
-@Service
-public class TaskexecuteService {
+@Component
+public class TaskExecuteComponent {
 
     private final static Logger            logger               = LogManager.getLogger("syncTaskService.default");
 
@@ -46,7 +46,7 @@ public class TaskexecuteService {
     private SyncTaskStateDao               stateDao;
 
     @Autowired
-    private TaskLocalStoregeService        taskLocalStoreService;
+    private TaskLocalStoregeComponent        taskLocalStoreService;
 
     private final ScheduledExecutorService scheuledScanShutDown = Executors.newScheduledThreadPool(1);
 

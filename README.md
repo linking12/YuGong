@@ -25,7 +25,7 @@ yugong是一个将数据库的数据同步到ElasticSearch的一个web系统
 
 # Quick Start
 
-* http：//yugong.dev.quancheng-ec.com
+* http://localhost:8080
 
 * 添加任务
 

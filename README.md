@@ -1,7 +1,7 @@
 # 概述
 
 yugong是一个将数据库的数据同步到ElasticSearch的一个web系统
-集成了ElasticSearchJdbc(https://github.com/jprante/elasticsearch-jdbc),并对其做了改造
+集成了ElasticSearchJdbc(https://github.com/jprante/elasticsearch-jdbc)
 
 # 功能
 

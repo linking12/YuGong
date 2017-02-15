@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
  * @author shimingliu 2017年2月15日 上午10:27:38
  * @version LoginComponent.java, v 0.0.1 2017年2月15日 上午10:27:38 shimingliu
  */
-@Component("LoginFilter")
+//@Component("LoginFilter")
 public class LoginComponent implements Filter {
 
     private static final Logger logger    = LoggerFactory.getLogger(LoginComponent.class);

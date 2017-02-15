@@ -15,15 +15,6 @@
  */
 package org.xbib.elasticsearch.jdbc.strategy.column;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.joda.time.DateTime;
-import org.xbib.elasticsearch.common.keyvalue.KeyValueStreamListener;
-import org.xbib.elasticsearch.jdbc.strategy.standard.StandardSource;
-import org.xbib.elasticsearch.common.util.IndexableObject;
-import org.xbib.elasticsearch.common.util.SinkKeyValueStreamListener;
-import org.xbib.elasticsearch.common.util.SQLCommand;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,6 +26,15 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xbib.elasticsearch.common.keyvalue.KeyValueStreamListener;
+import org.xbib.elasticsearch.common.util.IndexableObject;
+import org.xbib.elasticsearch.common.util.SQLCommand;
+import org.xbib.elasticsearch.common.util.SinkKeyValueStreamListener;
+import org.xbib.elasticsearch.jdbc.strategy.standard.StandardSource;
+
 /**
  * Source implementation for the 'column' strategy
  *
@@ -42,29 +42,29 @@ import java.util.List;
  */
 public class ColumnSource<C extends ColumnContext> extends StandardSource<C> {
 
-    private static final Logger logger = LogManager.getLogger("importer.jdbc.source.column");
+    private static final Logger logger                   = LoggerFactory.getLogger("importer.jdbc.source.column");
 
     private static final String WHERE_CLAUSE_PLACEHOLDER = "$where";
 
     /**
      * Column name that contains creation time (for column strategy)
      */
-    private String columnCreatedAt;
+    private String              columnCreatedAt;
 
     /**
      * Column name that contains last update time (for column strategy)
      */
-    private String columnUpdatedAt;
+    private String              columnUpdatedAt;
 
     /**
      * Column name that contains deletion time (for column strategy)
      */
-    private String columnDeletedAt;
+    private String              columnDeletedAt;
 
     /**
      * Columns name should be automatically escaped by proper db quote mark or not (for column strategy)
      */
-    private boolean columnEscape;
+    private boolean             columnEscape;
 
     @Override
     public String strategy() {
@@ -131,36 +131,35 @@ public class ColumnSource<C extends ColumnContext> extends StandardSource<C> {
     private List<OpInfo> getOpInfos(Connection connection) throws SQLException {
         String quoteString = getIdentifierQuoteString(connection);
         List<OpInfo> opInfos = new LinkedList<OpInfo>();
-        String noDeletedWhereClause = columnDeletedAt() != null ?
-                " AND " + quoteColumn(columnDeletedAt(), quoteString) + " IS NULL" : "";
+        String noDeletedWhereClause = columnDeletedAt() != null ? " AND " + quoteColumn(columnDeletedAt(), quoteString)
+                                                                  + " IS NULL" : "";
         if (isTimestampDiffSupported()) {
-            opInfos.add(new OpInfo("create", "{fn TIMESTAMPDIFF(SQL_TSI_SECOND,?,"
-                    + quoteColumn(columnCreatedAt(), quoteString)
-                    + ")} >= 0"
-                    + noDeletedWhereClause));
-            opInfos.add(new OpInfo("index", "{fn TIMESTAMPDIFF(SQL_TSI_SECOND,?,"
-                    + quoteColumn(columnUpdatedAt(), quoteString)
-                    + ")} >= 0 AND (" + quoteColumn(columnCreatedAt(), quoteString)
-                    + " IS NULL OR {fn TIMESTAMPDIFF(SQL_TSI_SECOND,?,"
-                    + quoteColumn(columnCreatedAt(), quoteString)
-                    + ")} < 0) "
-                    + noDeletedWhereClause, 2));
+            opInfos.add(new OpInfo("create",
+                                   "{fn TIMESTAMPDIFF(SQL_TSI_SECOND,?," + quoteColumn(columnCreatedAt(), quoteString)
+                                             + ")} >= 0" + noDeletedWhereClause));
+            opInfos.add(new OpInfo("index",
+                                   "{fn TIMESTAMPDIFF(SQL_TSI_SECOND,?," + quoteColumn(columnUpdatedAt(), quoteString)
+                                            + ")} >= 0 AND (" + quoteColumn(columnCreatedAt(), quoteString)
+                                            + " IS NULL OR {fn TIMESTAMPDIFF(SQL_TSI_SECOND,?,"
+                                            + quoteColumn(columnCreatedAt(), quoteString) + ")} < 0) "
+                                            + noDeletedWhereClause,
+                                   2));
             if (columnDeletedAt() != null) {
                 opInfos.add(new OpInfo("delete", "{fn TIMESTAMPDIFF(SQL_TSI_SECOND,?,"
-                        + quoteColumn(columnDeletedAt(), quoteString) + ")} >= 0"));
+                                                 + quoteColumn(columnDeletedAt(), quoteString) + ")} >= 0"));
             }
         } else {
             // no TIMESTAMPDIFF support
-            opInfos.add(new OpInfo("create", quoteColumn(columnCreatedAt(), quoteString)
-                    + " >= ?"
-                    + noDeletedWhereClause));
-            opInfos.add(new OpInfo("index", quoteColumn(columnUpdatedAt(), quoteString)
-                    + " >= ? AND (" + quoteColumn(columnCreatedAt(), quoteString)
-                    + " IS NULL OR " + quoteColumn(columnCreatedAt(), quoteString)
-                    + " < ?)" + noDeletedWhereClause, 2));
+            opInfos.add(new OpInfo("create",
+                                   quoteColumn(columnCreatedAt(), quoteString) + " >= ?" + noDeletedWhereClause));
+            opInfos.add(new OpInfo("index",
+                                   quoteColumn(columnUpdatedAt(), quoteString) + " >= ? AND ("
+                                            + quoteColumn(columnCreatedAt(), quoteString) + " IS NULL OR "
+                                            + quoteColumn(columnCreatedAt(), quoteString) + " < ?)"
+                                            + noDeletedWhereClause,
+                                   2));
             if (columnDeletedAt() != null) {
-                opInfos.add(new OpInfo("delete", quoteColumn(columnDeletedAt(), quoteString)
-                        + " >= ?"));
+                opInfos.add(new OpInfo("delete", quoteColumn(columnDeletedAt(), quoteString) + " >= ?"));
             }
         }
         return opInfos;
@@ -180,16 +179,18 @@ public class ColumnSource<C extends ColumnContext> extends StandardSource<C> {
     }
 
     private Timestamp getLastRunTimestamp() {
-        DateTime lastRunTime =  context.getLastRunTimestamp();
-                /*context.getState() != null ?
-                (DateTime) context.getState().getMap().get(ColumnFlow.LAST_RUN_TIME) : null;*/
+        DateTime lastRunTime = context.getLastRunTimestamp();
+        /*
+         * context.getState() != null ? (DateTime) context.getState().getMap().get(ColumnFlow.LAST_RUN_TIME) : null;
+         */
         if (lastRunTime == null) {
             return new Timestamp(0);
         }
         return new Timestamp(lastRunTime.getMillis() - context.getLastRunTimeStampOverlap().millis());
     }
 
-    private void fetch(Connection connection, SQLCommand command, OpInfo opInfo, Timestamp lastRunTimestamp) throws IOException, SQLException {
+    private void fetch(Connection connection, SQLCommand command, OpInfo opInfo,
+                       Timestamp lastRunTimestamp) throws IOException, SQLException {
         String fullSql = addWhereClauseToSqlQuery(command.getSQL(), opInfo.where);
         PreparedStatement stmt = connection.prepareStatement(fullSql);
         List<Object> params = createQueryParams(command, lastRunTimestamp, opInfo.paramsInWhere);
@@ -198,9 +199,7 @@ public class ColumnSource<C extends ColumnContext> extends StandardSource<C> {
         try {
             bind(stmt, params);
             result = executeQuery(stmt);
-            KeyValueStreamListener<Object, Object> listener =
-                    new ColumnKeyValueStreamListener<Object, Object>(opInfo.opType)
-                            .output(context.getSink());
+            KeyValueStreamListener<Object, Object> listener = new ColumnKeyValueStreamListener<Object, Object>(opInfo.opType).output(context.getSink());
             merge(command, result, listener);
         } catch (Exception e) {
             throw new IOException(e);
@@ -217,15 +216,16 @@ public class ColumnSource<C extends ColumnContext> extends StandardSource<C> {
         if (wherePlaceholderIndex >= 0) {
             return sql.replace(WHERE_CLAUSE_PLACEHOLDER, whereClauseToAppend);
         } else if (whereIndex >= 0) {
-            return sql.substring(0, whereIndex + whereKeyword.length()) + whereClauseToAppend + " AND " + sql.substring(whereIndex + whereKeyword.length());
+            return sql.substring(0, whereIndex + whereKeyword.length()) + whereClauseToAppend + " AND "
+                   + sql.substring(whereIndex + whereKeyword.length());
         } else {
             return sql + " WHERE " + whereClauseToAppend;
         }
     }
 
-    private List<Object> createQueryParams(SQLCommand command, Timestamp lastRunTimestamp, int lastRunTimestampParamsCount) {
-        List<Object> statementParams = command.getParameters() != null ?
-                command.getParameters() : Collections.emptyList();
+    private List<Object> createQueryParams(SQLCommand command, Timestamp lastRunTimestamp,
+                                           int lastRunTimestampParamsCount) {
+        List<Object> statementParams = command.getParameters() != null ? command.getParameters() : Collections.emptyList();
         List<Object> params = new ArrayList<Object>(statementParams.size() + lastRunTimestampParamsCount);
         for (int i = 0; i < lastRunTimestampParamsCount; i++) {
             params.add(lastRunTimestamp);
@@ -237,11 +237,12 @@ public class ColumnSource<C extends ColumnContext> extends StandardSource<C> {
     }
 
     private class OpInfo {
+
         final String opType;
         final String where;
-        final int paramsInWhere;
+        final int    paramsInWhere;
 
-        public OpInfo(String opType, String where, int paramsInWhere) {
+        public OpInfo(String opType, String where, int paramsInWhere){
             if (where != null && !where.equals("")) {
                 where = "(" + where + ")";
             }
@@ -250,7 +251,7 @@ public class ColumnSource<C extends ColumnContext> extends StandardSource<C> {
             this.paramsInWhere = paramsInWhere;
         }
 
-        public OpInfo(String opType, String where) {
+        public OpInfo(String opType, String where){
             this(opType, where, 1);
         }
 
@@ -263,7 +264,7 @@ public class ColumnSource<C extends ColumnContext> extends StandardSource<C> {
 
         private String opType;
 
-        public ColumnKeyValueStreamListener(String opType) {
+        public ColumnKeyValueStreamListener(String opType){
             this.opType = opType;
         }
 

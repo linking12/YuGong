@@ -15,18 +15,6 @@
  */
 package org.xbib.elasticsearch.jdbc.strategy.standard;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.elasticsearch.common.unit.TimeValue;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.xbib.elasticsearch.common.keyvalue.KeyValueStreamListener;
-import org.xbib.elasticsearch.common.util.ExceptionFormatter;
-import org.xbib.elasticsearch.common.metrics.SourceMetric;
-import org.xbib.elasticsearch.jdbc.strategy.JDBCSource;
-import org.xbib.elasticsearch.common.util.SinkKeyValueStreamListener;
-import org.xbib.elasticsearch.common.util.SQLCommand;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Array;
@@ -62,86 +50,96 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import org.elasticsearch.common.unit.TimeValue;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xbib.elasticsearch.common.keyvalue.KeyValueStreamListener;
+import org.xbib.elasticsearch.common.metrics.SourceMetric;
+import org.xbib.elasticsearch.common.util.ExceptionFormatter;
+import org.xbib.elasticsearch.common.util.SQLCommand;
+import org.xbib.elasticsearch.common.util.SinkKeyValueStreamListener;
+import org.xbib.elasticsearch.jdbc.strategy.JDBCSource;
+
 /**
- * Standard source implementation.
- * The standard source iterates through a JDBC result set,
- * merges the rows into Elasticsearch documents, and passes them to
- * a bulk indexer. There are two channels open, one for reading the database,
- * the other for writing.
+ * Standard source implementation. The standard source iterates through a JDBC result set, merges the rows into
+ * Elasticsearch documents, and passes them to a bulk indexer. There are two channels open, one for reading the
+ * database, the other for writing.
  */
 public class StandardSource<C extends StandardContext> implements JDBCSource<C> {
 
-    private final static Logger logger = LogManager.getLogger("importer.jdbc.source.standard");
+    private static final Logger       logger                = LoggerFactory.getLogger("importer.jdbc.source.standard");
 
-    protected C context;
+    protected C                       context;
 
-    protected String url;
+    protected String                  url;
 
-    protected String user;
+    protected String                  user;
 
-    protected String password;
+    protected String                  password;
 
-    protected Connection readConnection;
+    protected Connection              readConnection;
 
-    protected Connection writeConnection;
+    protected Connection              writeConnection;
 
-    protected Locale locale;
+    protected Locale                  locale;
 
-    protected TimeZone timezone;
+    protected TimeZone                timezone;
 
-    protected Calendar calendar;
+    protected Calendar                calendar;
 
-    protected DateTimeZone dateTimeZone;
+    protected DateTimeZone            dateTimeZone;
 
-    private boolean autocommit;
+    private boolean                   autocommit;
 
-    private int fetchSize;
+    private int                       fetchSize;
 
-    private int maxRows;
+    private int                       maxRows;
 
-    private int retries = 1;
+    private int                       retries               = 1;
 
-    private TimeValue maxretrywait = TimeValue.timeValueSeconds(30);
+    private TimeValue                 maxretrywait          = TimeValue.timeValueSeconds(30);
 
-    private int rounding;
+    private int                       rounding;
 
-    private int scale = -1;
+    private int                       scale                 = -1;
 
-    private String resultSetType = "TYPE_FORWARD_ONLY";
+    private String                    resultSetType         = "TYPE_FORWARD_ONLY";
 
-    private String resultSetConcurrency = "CONCUR_UPDATABLE";
+    private String                    resultSetConcurrency  = "CONCUR_UPDATABLE";
 
-    private boolean shouldIgnoreNull;
+    private boolean                   shouldIgnoreNull;
 
-    private boolean shouldDetectGeo;
+    private boolean                   shouldDetectGeo;
 
-    private boolean shouldDetectJson;
+    private boolean                   shouldDetectJson;
 
-    private boolean shouldPrepareResultSetMetadata;
+    private boolean                   shouldPrepareResultSetMetadata;
 
-    private boolean shouldPrepareDatabaseMetadata;
+    private boolean                   shouldPrepareDatabaseMetadata;
 
-    private Map<String, Object> lastResultSetMetadata = new HashMap<String, Object>();
+    private Map<String, Object>       lastResultSetMetadata = new HashMap<String, Object>();
 
-    private Map<String, Object> lastDatabaseMetadata = new HashMap<String, Object>();
+    private Map<String, Object>       lastDatabaseMetadata  = new HashMap<String, Object>();
 
-    private long lastRowCount;
+    private long                      lastRowCount;
 
-    private Map<String, Object> columnNameMap;
+    private Map<String, Object>       columnNameMap;
 
-    private Map<String, Object> lastRow = new HashMap<String, Object>();
+    private Map<String, Object>       lastRow               = new HashMap<String, Object>();
 
-    private List<SQLCommand> sql;
+    private List<SQLCommand>          sql;
 
-    private boolean isTimestampDiffSupported;
+    private boolean                   isTimestampDiffSupported;
 
-    private int queryTimeout;
+    private int                       queryTimeout;
 
-    private Map<String, Object> connectionProperties = new HashMap<String, Object>();
+    private Map<String, Object>       connectionProperties  = new HashMap<String, Object>();
 
-    private boolean shouldTreatBinaryAsString;
+    private boolean                   shouldTreatBinaryAsString;
 
-    private final static SourceMetric sourceMetric = new SourceMetric().start();
+    private final static SourceMetric sourceMetric          = new SourceMetric().start();
 
     @Override
     public String strategy() {
@@ -227,7 +225,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return autocommit;
     }
 
-    public StandardSource<C>  setFetchSize(int fetchSize) {
+    public StandardSource<C> setFetchSize(int fetchSize) {
         this.fetchSize = fetchSize;
         return this;
     }
@@ -236,7 +234,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return fetchSize;
     }
 
-    public StandardSource<C>  setMaxRows(int maxRows) {
+    public StandardSource<C> setMaxRows(int maxRows) {
         this.maxRows = maxRows;
         return this;
     }
@@ -245,7 +243,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return maxRows;
     }
 
-    public StandardSource<C>  setRetries(int retries) {
+    public StandardSource<C> setRetries(int retries) {
         this.retries = retries;
         return this;
     }
@@ -254,7 +252,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return retries;
     }
 
-    public StandardSource<C>  setMaxRetryWait(TimeValue maxretrywait) {
+    public StandardSource<C> setMaxRetryWait(TimeValue maxretrywait) {
         this.maxretrywait = maxretrywait;
         return this;
     }
@@ -263,7 +261,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return maxretrywait;
     }
 
-    public StandardSource<C>  setRounding(String rounding) {
+    public StandardSource<C> setRounding(String rounding) {
         if ("ceiling".equalsIgnoreCase(rounding)) {
             this.rounding = BigDecimal.ROUND_CEILING;
         } else if ("down".equalsIgnoreCase(rounding)) {
@@ -288,7 +286,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return rounding;
     }
 
-    public StandardSource<C>  setScale(int scale) {
+    public StandardSource<C> setScale(int scale) {
         this.scale = scale;
         return this;
     }
@@ -297,7 +295,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return scale;
     }
 
-    public StandardSource<C>  setResultSetType(String resultSetType) {
+    public StandardSource<C> setResultSetType(String resultSetType) {
         this.resultSetType = resultSetType;
         return this;
     }
@@ -306,7 +304,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return resultSetType;
     }
 
-    public StandardSource<C>  setResultSetConcurrency(String resultSetConcurrency) {
+    public StandardSource<C> setResultSetConcurrency(String resultSetConcurrency) {
         this.resultSetConcurrency = resultSetConcurrency;
         return this;
     }
@@ -360,7 +358,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return shouldPrepareDatabaseMetadata;
     }
 
-    public StandardSource<C>  setLastResultSetMetadata(Map<String, Object> lastResultSetMetadata) {
+    public StandardSource<C> setLastResultSetMetadata(Map<String, Object> lastResultSetMetadata) {
         this.lastResultSetMetadata = lastResultSetMetadata;
         return this;
     }
@@ -387,7 +385,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return lastRowCount;
     }
 
-    public StandardSource<C>  setColumnNameMap(Map<String, Object> columnNameMap) {
+    public StandardSource<C> setColumnNameMap(Map<String, Object> columnNameMap) {
         this.columnNameMap = columnNameMap;
         return this;
     }
@@ -396,7 +394,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return columnNameMap;
     }
 
-    public StandardSource<C>  setLastRow(Map<String, Object> lastRow) {
+    public StandardSource<C> setLastRow(Map<String, Object> lastRow) {
         this.lastRow = lastRow;
         return this;
     }
@@ -414,7 +412,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
         return sql;
     }
 
-    public StandardSource<C>  setTimestampDiffSupported(boolean supported) {
+    public StandardSource<C> setTimestampDiffSupported(boolean supported) {
         this.isTimestampDiffSupported = supported;
         return this;
     }
@@ -498,7 +496,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                     // Postgresql cursor mode condition:
                     // fetchsize > 0, no scrollable result set, no auto commit, no holdable cursors over commit
                     // https://github.com/pgjdbc/pgjdbc/blob/master/org/postgresql/jdbc2/AbstractJdbc2Statement.java#L514
-                    //readConnection.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+                    // readConnection.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
                     // many drivers don't like autocommit=true
                     readConnection.setAutoCommit(getAutoCommit());
                     return readConnection;
@@ -577,7 +575,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
      * Fetch, issue SQL statements.
      *
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @Override
     public void fetch() throws SQLException, IOException {
@@ -657,7 +655,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
      *
      * @param command the SQL command
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     private void execute(SQLCommand command) throws Exception {
         Statement statement = null;
@@ -681,11 +679,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                     if (shouldPrepareResultSetMetadata()) {
                         prepare(results.getMetaData());
                     }
-                    SinkKeyValueStreamListener<Object, Object> listener = new SinkKeyValueStreamListener<Object, Object>()
-                            .output(context.getSink())
-                            .shouldIgnoreNull(shouldIgnoreNull())
-                            .shouldDetectGeo(shouldDetectGeo())
-                            .shouldDetectJson(shouldDetectJson());
+                    SinkKeyValueStreamListener<Object, Object> listener = new SinkKeyValueStreamListener<Object, Object>().output(context.getSink()).shouldIgnoreNull(shouldIgnoreNull()).shouldDetectGeo(shouldDetectGeo()).shouldDetectJson(shouldDetectJson());
                     merge(command, results, listener);
                 }
             } else {
@@ -708,7 +702,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
      *
      * @param command the SQL command
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     private void executeWithParameter(SQLCommand command) throws Exception {
         PreparedStatement statement = null;
@@ -719,11 +713,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 bind(statement, command.getParameters());
                 logger.info("execute sql is {} ", statement.toString());
                 results = executeQuery(statement);
-                SinkKeyValueStreamListener<Object, Object> listener = new SinkKeyValueStreamListener<Object, Object>()
-                        .output(context.getSink())
-                        .shouldIgnoreNull(shouldIgnoreNull())
-                        .shouldDetectGeo(shouldDetectGeo())
-                        .shouldDetectJson(shouldDetectJson());
+                SinkKeyValueStreamListener<Object, Object> listener = new SinkKeyValueStreamListener<Object, Object>().output(context.getSink()).shouldIgnoreNull(shouldIgnoreNull()).shouldDetectGeo(shouldDetectGeo()).shouldDetectJson(shouldDetectJson());
                 merge(command, results, listener);
             } else {
                 statement = prepareUpdate(command.getSQL());
@@ -741,7 +731,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
      *
      * @param command the SQL command
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     private void executeCallable(SQLCommand command) throws Exception {
         // call stored procedure
@@ -760,8 +750,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                     register(statement, command.getRegister());
                 }
                 boolean hasRows = statement.execute();
-                SinkKeyValueStreamListener<Object, Object> listener = new SinkKeyValueStreamListener<Object, Object>()
-                        .output(context.getSink());
+                SinkKeyValueStreamListener<Object, Object> listener = new SinkKeyValueStreamListener<Object, Object>().output(context.getSink());
                 if (hasRows) {
                     logger.debug("callable execution created result set");
                     while (hasRows) {
@@ -782,14 +771,14 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
     /**
      * Merge key/values from JDBC result set
      *
-     * @param command  the SQL command that created this result set
-     * @param results  result set
+     * @param command the SQL command that created this result set
+     * @param results result set
      * @param listener the value listener
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
-    protected void merge(SQLCommand command, ResultSet results, KeyValueStreamListener listener)
-            throws SQLException, IOException {
+    protected void merge(SQLCommand command, ResultSet results, KeyValueStreamListener listener) throws SQLException,
+                                                                                                 IOException {
         if (listener == null) {
             return;
         }
@@ -828,12 +817,8 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
             throw new SQLException("can't connect to source " + url);
         }
         logger.debug("preparing statement with SQL {}", sql);
-        int type = "TYPE_FORWARD_ONLY".equals(getResultSetType()) ?
-                ResultSet.TYPE_FORWARD_ONLY : "TYPE_SCROLL_SENSITIVE".equals(getResultSetType()) ?
-                ResultSet.TYPE_SCROLL_SENSITIVE : "TYPE_SCROLL_INSENSITIVE".equals(getResultSetType()) ?
-                ResultSet.TYPE_SCROLL_INSENSITIVE : ResultSet.TYPE_FORWARD_ONLY;
-        int concurrency = "CONCUR_READ_ONLY".equals(getResultSetConcurrency()) ?
-                ResultSet.CONCUR_READ_ONLY : ResultSet.CONCUR_UPDATABLE;
+        int type = "TYPE_FORWARD_ONLY".equals(getResultSetType()) ? ResultSet.TYPE_FORWARD_ONLY : "TYPE_SCROLL_SENSITIVE".equals(getResultSetType()) ? ResultSet.TYPE_SCROLL_SENSITIVE : "TYPE_SCROLL_INSENSITIVE".equals(getResultSetType()) ? ResultSet.TYPE_SCROLL_INSENSITIVE : ResultSet.TYPE_FORWARD_ONLY;
+        int concurrency = "CONCUR_READ_ONLY".equals(getResultSetConcurrency()) ? ResultSet.CONCUR_READ_ONLY : ResultSet.CONCUR_UPDATABLE;
         return connection.prepareStatement(sql, type, concurrency);
     }
 
@@ -857,7 +842,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
      * Bind values to prepared statement
      *
      * @param statement the prepared statement
-     * @param values    the values to bind
+     * @param values the values to bind
      * @throws SQLException when SQL execution gives an error
      */
     @Override
@@ -876,13 +861,13 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
      * Merge key/values from registered params of a callable statement
      *
      * @param statement callable statement
-     * @param listener  the value listener
+     * @param listener the value listener
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
-    @SuppressWarnings({"unchecked"})
-    private void merge(SQLCommand command, CallableStatement statement, KeyValueStreamListener listener)
-            throws SQLException, IOException {
+    @SuppressWarnings({ "unchecked" })
+    private void merge(SQLCommand command, CallableStatement statement,
+                       KeyValueStreamListener listener) throws SQLException, IOException {
         Map<String, Object> map = command.getRegister();
         if (map.isEmpty()) {
             // no register given, return without doing anything
@@ -908,12 +893,12 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
      * Register variables in callable statement
      *
      * @param statement callable statement
-     * @param values    values
+     * @param values values
      * @return this source
      * @throws SQLException when SQL execution gives an error
      */
     @Override
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({ "unchecked" })
     public StandardSource<C> register(CallableStatement statement, Map<String, Object> values) throws SQLException {
         if (values == null) {
             return this;
@@ -924,8 +909,8 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
             Object o = m.get("pos");
             if (o != null) {
                 Integer n = o instanceof Integer ? (Integer) o : Integer.parseInt(o.toString());
-                o =  m.get("type");
-                String type = o instanceof String ? (String) o: o.toString();
+                o = m.get("type");
+                String type = o instanceof String ? (String) o : o.toString();
                 if (type != null) {
                     logger.debug("registerOutParameter: n={} type={}", n, toJDBCType(type));
                     try {
@@ -957,7 +942,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
      * Execute query statement
      *
      * @param statement the statement
-     * @param sql       the SQL
+     * @param sql the SQL
      * @return the result set
      * @throws SQLException when SQL execution gives an error
      */
@@ -1001,26 +986,24 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
     }
 
     @Override
-    public void beforeRows(ResultSet results, KeyValueStreamListener listener)
-            throws SQLException, IOException {
+    public void beforeRows(ResultSet results, KeyValueStreamListener listener) throws SQLException, IOException {
         beforeRows(null, results, listener);
     }
 
     /**
-     * Before rows are read, let the KeyValueStreamListener know about the keys.
-     * If the SQL command was a callable statement and a register is there, look into the register map
-     * for the key names, not in the result set metadata.
+     * Before rows are read, let the KeyValueStreamListener know about the keys. If the SQL command was a callable
+     * statement and a register is there, look into the register map for the key names, not in the result set metadata.
      *
-     * @param command  the SQL command that created this result set
-     * @param results  the result set
+     * @param command the SQL command that created this result set
+     * @param results the result set
      * @param listener the key/value stream listener
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @Override
-    @SuppressWarnings({"unchecked"})
-    public void beforeRows(SQLCommand command, ResultSet results, KeyValueStreamListener listener)
-            throws SQLException, IOException {
+    @SuppressWarnings({ "unchecked" })
+    public void beforeRows(SQLCommand command, ResultSet results, KeyValueStreamListener listener) throws SQLException,
+                                                                                                   IOException {
         List<String> keys = new LinkedList();
         if (command != null && command.isCallable() && !command.getRegister().isEmpty()) {
             for (Map.Entry<String, Object> me : command.getRegister().entrySet()) {
@@ -1042,25 +1025,24 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
     }
 
     @Override
-    public boolean nextRow(ResultSet results, KeyValueStreamListener listener)
-            throws SQLException, IOException {
+    public boolean nextRow(ResultSet results, KeyValueStreamListener listener) throws SQLException, IOException {
         return nextRow(null, results, listener);
     }
 
     /**
-     * Get next row and prepare the values for processing. The labels of each
-     * columns are used for the ValueListener as paths for JSON object merging.
+     * Get next row and prepare the values for processing. The labels of each columns are used for the ValueListener as
+     * paths for JSON object merging.
      *
-     * @param command  the SQL command that created this result set
-     * @param results  the result set
+     * @param command the SQL command that created this result set
+     * @param results the result set
      * @param listener the listener
      * @return true if row exists and was processed, false otherwise
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @Override
-    public boolean nextRow(SQLCommand command, ResultSet results, KeyValueStreamListener listener)
-            throws SQLException, IOException {
+    public boolean nextRow(SQLCommand command, ResultSet results, KeyValueStreamListener listener) throws SQLException,
+                                                                                                   IOException {
         if (results.next()) {
             processRow(results, listener);
             return true;
@@ -1069,30 +1051,27 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
     }
 
     @Override
-    public void afterRows(ResultSet results, KeyValueStreamListener listener)
-            throws SQLException, IOException {
+    public void afterRows(ResultSet results, KeyValueStreamListener listener) throws SQLException, IOException {
         afterRows(null, results, listener);
     }
 
     /**
-     * After the rows keys and values, let the listener know about the end of
-     * the result set.
+     * After the rows keys and values, let the listener know about the end of the result set.
      *
-     * @param command  the SQL command that created this result set
-     * @param results  the result set
+     * @param command the SQL command that created this result set
+     * @param results the result set
      * @param listener the key/value stream listener
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @Override
-    public void afterRows(SQLCommand command, ResultSet results, KeyValueStreamListener listener)
-            throws SQLException, IOException {
+    public void afterRows(SQLCommand command, ResultSet results, KeyValueStreamListener listener) throws SQLException,
+                                                                                                  IOException {
         listener.end();
     }
 
-    @SuppressWarnings({"unchecked"})
-    private void processRow(ResultSet results, KeyValueStreamListener listener)
-            throws SQLException, IOException {
+    @SuppressWarnings({ "unchecked" })
+    private void processRow(ResultSet results, KeyValueStreamListener listener) throws SQLException, IOException {
         List<Object> values = new LinkedList<Object>();
         ResultSetMetaData metadata = results.getMetaData();
         int columns = metadata.getColumnCount();
@@ -1186,6 +1165,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
 
     private void prepare(final DatabaseMetaData metaData) throws SQLException {
         Map<String, Object> m = new HashMap<String, Object>() {
+
             {
                 put("$meta.db.allproceduresarecallable", metaData.allProceduresAreCallable());
                 put("$meta.db.alltablesareselectable", metaData.allTablesAreSelectable());
@@ -1243,6 +1223,7 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
 
     private void prepare(final ResultSetMetaData metaData) throws SQLException {
         Map<String, Object> m = new HashMap<String, Object>() {
+
             {
                 put("$meta.row.columnCount", metaData.getColumnCount());
             }
@@ -1296,21 +1277,26 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 statement.setString(i, ExceptionFormatter.format(context.getThrowable()));
             } else if ("$metrics.lastexecutionstart".equals(s)) {
                 DateTime dateTime = sourceMetric != null ? sourceMetric.getLastExecutionStart() : null;
-                statement.setTimestamp(i, dateTime != null ? new Timestamp(dateTime.getMillis()) : new Timestamp(new DateTime(0).getMillis()));
+                statement.setTimestamp(i,
+                                       dateTime != null ? new Timestamp(dateTime.getMillis()) : new Timestamp(new DateTime(0).getMillis()));
             } else if ("$metrics.lastexecutionend".equals(s)) {
                 DateTime dateTime = sourceMetric != null ? sourceMetric.getLastExecutionEnd() : null;
                 statement.setTimestamp(i, dateTime != null ? new Timestamp(dateTime.getMillis()) : null);
             } else if ("$metrics.totalrows".equals(s)) {
-                Long count = sourceMetric != null && sourceMetric.getTotalRows() != null ? sourceMetric.getTotalRows().count() : -1L;
+                Long count = sourceMetric != null
+                             && sourceMetric.getTotalRows() != null ? sourceMetric.getTotalRows().count() : -1L;
                 statement.setLong(i, count);
             } else if ("$metrics.totalbytes".equals(s)) {
-                Long count = sourceMetric != null && sourceMetric.getTotalSizeInBytes() != null ? sourceMetric.getTotalSizeInBytes().count() : -1L;
+                Long count = sourceMetric != null
+                             && sourceMetric.getTotalSizeInBytes() != null ? sourceMetric.getTotalSizeInBytes().count() : -1L;
                 statement.setLong(i, count);
             } else if ("$metrics.failed".equals(s)) {
-                Long count = sourceMetric != null && sourceMetric.getFailed() != null ? sourceMetric.getFailed().count() : -1L;
+                Long count = sourceMetric != null
+                             && sourceMetric.getFailed() != null ? sourceMetric.getFailed().count() : -1L;
                 statement.setLong(i, count);
             } else if ("$metrics.succeeded".equals(s)) {
-                Long count = sourceMetric != null && sourceMetric.getSucceeded() != null ? sourceMetric.getSucceeded().count() : -1L;
+                Long count = sourceMetric != null
+                             && sourceMetric.getSucceeded() != null ? sourceMetric.getSucceeded().count() : -1L;
                 statement.setLong(i, count);
             } else if (shouldPrepareDatabaseMetadata()) {
                 for (String k : getLastDatabaseMetadata().keySet()) {
@@ -1355,23 +1341,22 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
      * Parse of value of result set
      *
      * @param result the result set
-     * @param i      the offset in the result set
-     * @param type   the JDBC type
+     * @param i the offset in the result set
+     * @param type the JDBC type
      * @param locale the locale to use for parsing
      * @return The parse value
      * @throws SQLException when SQL execution gives an error
-     * @throws IOException  when input/output error occurs
+     * @throws IOException when input/output error occurs
      */
     @Override
-    public Object parseType(ResultSet result, Integer i, int type, Locale locale)
-            throws SQLException, IOException, ParseException {
+    public Object parseType(ResultSet result, Integer i, int type, Locale locale) throws SQLException, IOException,
+                                                                                  ParseException {
         logger.trace("i={} type={}", i, type);
         switch (type) {
             /**
-             * The JDBC types CHAR, VARCHAR, and LONGVARCHAR are closely
-             * related. CHAR represents a small, fixed-length character string,
-             * VARCHAR represents a small, variable-length character string, and
-             * LONGVARCHAR represents a large, variable-length character string.
+             * The JDBC types CHAR, VARCHAR, and LONGVARCHAR are closely related. CHAR represents a small, fixed-length
+             * character string, VARCHAR represents a small, variable-length character string, and LONGVARCHAR
+             * represents a large, variable-length character string.
              */
             case Types.CHAR:
             case Types.VARCHAR:
@@ -1384,10 +1369,9 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 return result.getNString(i);
             }
             /**
-             * The JDBC types BINARY, VARBINARY, and LONGVARBINARY are closely
-             * related. BINARY represents a small, fixed-length binary value,
-             * VARBINARY represents a small, variable-length binary value, and
-             * LONGVARBINARY represents a large, variable-length binary value
+             * The JDBC types BINARY, VARBINARY, and LONGVARBINARY are closely related. BINARY represents a small,
+             * fixed-length binary value, VARBINARY represents a small, variable-length binary value, and LONGVARBINARY
+             * represents a large, variable-length binary value
              */
             case Types.BINARY:
             case Types.VARBINARY:
@@ -1396,50 +1380,35 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 return shouldTreatBinaryAsString() ? (b != null ? new String(b) : null) : b;
             }
             /**
-             * The JDBC type ARRAY represents the SQL3 type ARRAY.
-             *
-             * An ARRAY value is mapped to an instance of the Array interface in
-             * the Java programming language. If a driver follows the standard
-             * implementation, an Array object logically points to an ARRAY
-             * value on the server rather than containing the elements of the
-             * ARRAY object, which can greatly increase efficiency. The Array
-             * interface contains methods for materializing the elements of the
-             * ARRAY object on the client in the form of either an array or a
-             * ResultSet object.
+             * The JDBC type ARRAY represents the SQL3 type ARRAY. An ARRAY value is mapped to an instance of the Array
+             * interface in the Java programming language. If a driver follows the standard implementation, an Array
+             * object logically points to an ARRAY value on the server rather than containing the elements of the ARRAY
+             * object, which can greatly increase efficiency. The Array interface contains methods for materializing the
+             * elements of the ARRAY object on the client in the form of either an array or a ResultSet object.
              */
             case Types.ARRAY: {
                 Array arr = result.getArray(i);
                 return arr == null ? null : arr.getArray();
             }
             /**
-             * The JDBC type BIGINT represents a 64-bit signed integer value
-             * between -9223372036854775808 and 9223372036854775807.
-             *
-             * The corresponding SQL type BIGINT is a nonstandard extension to
-             * SQL. In practice the SQL BIGINT type is not yet currently
-             * implemented by any of the major databases, and we recommend that
-             * its use be avoided in code that is intended to be portable.
-             *
-             * The recommended Java mapping for the BIGINT type is as a Java
-             * long.
+             * The JDBC type BIGINT represents a 64-bit signed integer value between -9223372036854775808 and
+             * 9223372036854775807. The corresponding SQL type BIGINT is a nonstandard extension to SQL. In practice the
+             * SQL BIGINT type is not yet currently implemented by any of the major databases, and we recommend that its
+             * use be avoided in code that is intended to be portable. The recommended Java mapping for the BIGINT type
+             * is as a Java long.
              */
             case Types.BIGINT: {
                 Object o = result.getLong(i);
                 return result.wasNull() ? null : o;
             }
             /**
-             * The JDBC type BIT represents a single bit value that can be zero
-             * or one.
-             *
-             * SQL-92 defines an SQL BIT type. However, unlike the JDBC BIT
-             * type, this SQL-92 BIT type can be used as a parameterized type to
-             * define a fixed-length binary string. Fortunately, SQL-92 also
-             * permits the use of the simple non-parameterized BIT type to
-             * represent a single binary digit, and this usage corresponds to
-             * the JDBC BIT type. Unfortunately, the SQL-92 BIT type is only
-             * required in "full" SQL-92 and is currently supported by only a
-             * subset of the major databases. Portable code may therefore prefer
-             * to use the JDBC SMALLINT type, which is widely supported.
+             * The JDBC type BIT represents a single bit value that can be zero or one. SQL-92 defines an SQL BIT type.
+             * However, unlike the JDBC BIT type, this SQL-92 BIT type can be used as a parameterized type to define a
+             * fixed-length binary string. Fortunately, SQL-92 also permits the use of the simple non-parameterized BIT
+             * type to represent a single binary digit, and this usage corresponds to the JDBC BIT type. Unfortunately,
+             * the SQL-92 BIT type is only required in "full" SQL-92 and is currently supported by only a subset of the
+             * major databases. Portable code may therefore prefer to use the JDBC SMALLINT type, which is widely
+             * supported.
              */
             case Types.BIT: {
                 try {
@@ -1447,7 +1416,8 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                     return result.wasNull() ? null : o;
                 } catch (Exception e) {
                     String exceptionClassName = e.getClass().getName();
-                    // postgresql can not handle boolean, it will throw PSQLException, something like "Bad value for type int : t"
+                    // postgresql can not handle boolean, it will throw PSQLException, something like "Bad value for
+                    // type int : t"
                     if ("org.postgresql.util.PSQLException".equals(exceptionClassName)) {
                         return "t".equals(result.getString(i));
                     }
@@ -1455,24 +1425,19 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 }
             }
             /**
-             * The JDBC type BOOLEAN, which is new in the JDBC 3.0 API, maps to
-             * a boolean in the Java programming language. It provides a
-             * representation of true and false, and therefore is a better match
-             * than the JDBC type BIT, which is either 1 or 0.
+             * The JDBC type BOOLEAN, which is new in the JDBC 3.0 API, maps to a boolean in the Java programming
+             * language. It provides a representation of true and false, and therefore is a better match than the JDBC
+             * type BIT, which is either 1 or 0.
              */
             case Types.BOOLEAN: {
                 return result.getBoolean(i);
             }
             /**
-             * The JDBC type BLOB represents an SQL3 BLOB (Binary Large Object).
-             *
-             * A JDBC BLOB value is mapped to an instance of the Blob interface
-             * in the Java programming language. If a driver follows the
-             * standard implementation, a Blob object logically points to the
-             * BLOB value on the server rather than containing its binary data,
-             * greatly improving efficiency. The Blob interface provides methods
-             * for materializing the BLOB data on the client when that is
-             * desired.
+             * The JDBC type BLOB represents an SQL3 BLOB (Binary Large Object). A JDBC BLOB value is mapped to an
+             * instance of the Blob interface in the Java programming language. If a driver follows the standard
+             * implementation, a Blob object logically points to the BLOB value on the server rather than containing its
+             * binary data, greatly improving efficiency. The Blob interface provides methods for materializing the BLOB
+             * data on the client when that is desired.
              */
             case Types.BLOB: {
                 Blob blob = result.getBlob(i);
@@ -1488,16 +1453,11 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 break;
             }
             /**
-             * The JDBC type CLOB represents the SQL3 type CLOB (Character Large
-             * Object).
-             *
-             * A JDBC CLOB value is mapped to an instance of the Clob interface
-             * in the Java programming language. If a driver follows the
-             * standard implementation, a Clob object logically points to the
-             * CLOB value on the server rather than containing its character
-             * data, greatly improving efficiency. Two of the methods on the
-             * Clob interface materialize the data of a CLOB object on the
-             * client.
+             * The JDBC type CLOB represents the SQL3 type CLOB (Character Large Object). A JDBC CLOB value is mapped to
+             * an instance of the Clob interface in the Java programming language. If a driver follows the standard
+             * implementation, a Clob object logically points to the CLOB value on the server rather than containing its
+             * character data, greatly improving efficiency. Two of the methods on the Clob interface materialize the
+             * data of a CLOB object on the client.
              */
             case Types.CLOB: {
                 Clob clob = result.getClob(i);
@@ -1526,35 +1486,22 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 break;
             }
             /**
-             * The JDBC type DATALINK, new in the JDBC 3.0 API, is a column
-             * value that references a file that is outside of a data source but
-             * is managed by the data source. It maps to the Java type
-             * java.net.URL and provides a way to manage external files. For
-             * instance, if the data source is a DBMS, the concurrency controls
-             * it enforces on its own data can be applied to the external file
-             * as well.
-             *
-             * A DATALINK value is retrieved from a ResultSet object with the
-             * ResultSet methods getURL or getObject. If the Java platform does
-             * not support the type of URL returned by getURL or getObject, a
-             * DATALINK value can be retrieved as a String object with the
-             * method getString.
-             *
-             * java.net.URL values are stored in a database using the method
-             * setURL. If the Java platform does not support the type of URL
-             * being set, the method setString can be used instead.
-             *
-             *
+             * The JDBC type DATALINK, new in the JDBC 3.0 API, is a column value that references a file that is outside
+             * of a data source but is managed by the data source. It maps to the Java type java.net.URL and provides a
+             * way to manage external files. For instance, if the data source is a DBMS, the concurrency controls it
+             * enforces on its own data can be applied to the external file as well. A DATALINK value is retrieved from
+             * a ResultSet object with the ResultSet methods getURL or getObject. If the Java platform does not support
+             * the type of URL returned by getURL or getObject, a DATALINK value can be retrieved as a String object
+             * with the method getString. java.net.URL values are stored in a database using the method setURL. If the
+             * Java platform does not support the type of URL being set, the method setString can be used instead.
              */
             case Types.DATALINK: {
                 return result.getURL(i);
             }
             /**
-             * The JDBC DATE type represents a date consisting of day, month,
-             * and year. The corresponding SQL DATE type is defined in SQL-92,
-             * but it is implemented by only a subset of the major databases.
-             * Some databases offer alternative SQL types that support similar
-             * semantics.
+             * The JDBC DATE type represents a date consisting of day, month, and year. The corresponding SQL DATE type
+             * is defined in SQL-92, but it is implemented by only a subset of the major databases. Some databases offer
+             * alternative SQL types that support similar semantics.
              */
             case Types.DATE: {
                 try {
@@ -1582,44 +1529,26 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 }
             }
             /**
-             * The JDBC types DECIMAL and NUMERIC are very similar. They both
-             * represent fixed-precision decimal values.
-             *
-             * The corresponding SQL types DECIMAL and NUMERIC are defined in
-             * SQL-92 and are very widely implemented. These SQL types take
-             * precision and scale parameters. The precision is the total number
-             * of decimal digits supported, and the scale is the number of
-             * decimal digits after the decimal point. For most DBMSs, the scale
-             * is less than or equal to the precision. So for example, the value
-             * "12.345" has a precision of 5 and a scale of 3, and the value
-             * ".11" has a precision of 2 and a scale of 2. JDBC requires that
-             * all DECIMAL and NUMERIC types support both a precision and a
-             * scale of at least 15.
-             *
-             * The sole distinction between DECIMAL and NUMERIC is that the
-             * SQL-92 specification requires that NUMERIC types be represented
-             * with exactly the specified precision, whereas for DECIMAL types,
-             * it allows an implementation to add additional precision beyond
-             * that specified when the type was created. Thus a column created
-             * with type NUMERIC(12,4) will always be represented with exactly
-             * 12 digits, whereas a column created with type DECIMAL(12,4) might
-             * be represented by some larger number of digits.
-             *
-             * The recommended Java mapping for the DECIMAL and NUMERIC types is
-             * java.math.BigDecimal. The java.math.BigDecimal type provides math
-             * operations to allow BigDecimal types to be added, subtracted,
-             * multiplied, and divided with other BigDecimal types, with integer
-             * types, and with floating point types.
-             *
-             * The method recommended for retrieving DECIMAL and NUMERIC values
-             * is ResultSet.getBigDecimal. JDBC also allows access to these SQL
-             * types as simple Strings or arrays of char. Thus, Java programmers
-             * can use getString to receive a DECIMAL or NUMERIC result.
-             * However, this makes the common case where DECIMAL or NUMERIC are
-             * used for currency values rather awkward, since it means that
-             * application writers have to perform math on strings. It is also
-             * possible to retrieve these SQL types as any of the Java numeric
-             * types.
+             * The JDBC types DECIMAL and NUMERIC are very similar. They both represent fixed-precision decimal values.
+             * The corresponding SQL types DECIMAL and NUMERIC are defined in SQL-92 and are very widely implemented.
+             * These SQL types take precision and scale parameters. The precision is the total number of decimal digits
+             * supported, and the scale is the number of decimal digits after the decimal point. For most DBMSs, the
+             * scale is less than or equal to the precision. So for example, the value "12.345" has a precision of 5 and
+             * a scale of 3, and the value ".11" has a precision of 2 and a scale of 2. JDBC requires that all DECIMAL
+             * and NUMERIC types support both a precision and a scale of at least 15. The sole distinction between
+             * DECIMAL and NUMERIC is that the SQL-92 specification requires that NUMERIC types be represented with
+             * exactly the specified precision, whereas for DECIMAL types, it allows an implementation to add additional
+             * precision beyond that specified when the type was created. Thus a column created with type NUMERIC(12,4)
+             * will always be represented with exactly 12 digits, whereas a column created with type DECIMAL(12,4) might
+             * be represented by some larger number of digits. The recommended Java mapping for the DECIMAL and NUMERIC
+             * types is java.math.BigDecimal. The java.math.BigDecimal type provides math operations to allow BigDecimal
+             * types to be added, subtracted, multiplied, and divided with other BigDecimal types, with integer types,
+             * and with floating point types. The method recommended for retrieving DECIMAL and NUMERIC values is
+             * ResultSet.getBigDecimal. JDBC also allows access to these SQL types as simple Strings or arrays of char.
+             * Thus, Java programmers can use getString to receive a DECIMAL or NUMERIC result. However, this makes the
+             * common case where DECIMAL or NUMERIC are used for currency values rather awkward, since it means that
+             * application writers have to perform math on strings. It is also possible to retrieve these SQL types as
+             * any of the Java numeric types.
              */
             case Types.DECIMAL:
             case Types.NUMERIC: {
@@ -1655,18 +1584,11 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 }
             }
             /**
-             * The JDBC type DOUBLE represents a "double precision" floating
-             * point number that supports 15 digits of mantissa.
-             *
-             * The corresponding SQL type is DOUBLE PRECISION, which is defined
-             * in SQL-92 and is widely supported by the major databases. The
-             * SQL-92 standard leaves the precision of DOUBLE PRECISION up to
-             * the implementation, but in practice all the major databases
-             * supporting DOUBLE PRECISION support a mantissa precision of at
-             * least 15 digits.
-             *
-             * The recommended Java mapping for the DOUBLE type is as a Java
-             * double.
+             * The JDBC type DOUBLE represents a "double precision" floating point number that supports 15 digits of
+             * mantissa. The corresponding SQL type is DOUBLE PRECISION, which is defined in SQL-92 and is widely
+             * supported by the major databases. The SQL-92 standard leaves the precision of DOUBLE PRECISION up to the
+             * implementation, but in practice all the major databases supporting DOUBLE PRECISION support a mantissa
+             * precision of at least 15 digits. The recommended Java mapping for the DOUBLE type is as a Java double.
              */
             case Types.DOUBLE: {
                 String s = result.getString(i);
@@ -1678,22 +1600,14 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 return number.doubleValue();
             }
             /**
-             * The JDBC type FLOAT is basically equivalent to the JDBC type
-             * DOUBLE. We provided both FLOAT and DOUBLE in a possibly misguided
-             * attempt at consistency with previous database APIs. FLOAT
-             * represents a "double precision" floating point number that
-             * supports 15 digits of mantissa.
-             *
-             * The corresponding SQL type FLOAT is defined in SQL-92. The SQL-92
-             * standard leaves the precision of FLOAT up to the implementation,
-             * but in practice all the major databases supporting FLOAT support
-             * a mantissa precision of at least 15 digits.
-             *
-             * The recommended Java mapping for the FLOAT type is as a Java
-             * double. However, because of the potential confusion between the
-             * double precision SQL FLOAT and the single precision Java float,
-             * we recommend that JDBC programmers should normally use the JDBC
-             * DOUBLE type in preference to FLOAT.
+             * The JDBC type FLOAT is basically equivalent to the JDBC type DOUBLE. We provided both FLOAT and DOUBLE in
+             * a possibly misguided attempt at consistency with previous database APIs. FLOAT represents a "double
+             * precision" floating point number that supports 15 digits of mantissa. The corresponding SQL type FLOAT is
+             * defined in SQL-92. The SQL-92 standard leaves the precision of FLOAT up to the implementation, but in
+             * practice all the major databases supporting FLOAT support a mantissa precision of at least 15 digits. The
+             * recommended Java mapping for the FLOAT type is as a Java double. However, because of the potential
+             * confusion between the double precision SQL FLOAT and the single precision Java float, we recommend that
+             * JDBC programmers should normally use the JDBC DOUBLE type in preference to FLOAT.
              */
             case Types.FLOAT: {
                 String s = result.getString(i);
@@ -1705,42 +1619,27 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 return number.doubleValue();
             }
             /**
-             * The JDBC type JAVA_OBJECT, added in the JDBC 2.0 core API, makes
-             * it easier to use objects in the Java programming language as
-             * values in a database. JAVA_OBJECT is simply a type code for an
-             * instance of a class defined in the Java programming language that
-             * is stored as a database object. The type JAVA_OBJECT is used by a
-             * database whose type system has been extended so that it can store
-             * Java objects directly. The JAVA_OBJECT value may be stored as a
-             * serialized Java object, or it may be stored in some
-             * vendor-specific format.
-             *
-             * The type JAVA_OBJECT is one of the possible values for the column
-             * DATA_TYPE in the ResultSet objects returned by various
-             * DatabaseMetaData methods, including getTypeInfo, getColumns, and
-             * getUDTs. The method getUDTs, part of the new JDBC 2.0 core API,
-             * will return information about the Java objects contained in a
-             * particular schema when it is given the appropriate parameters.
-             * Having this information available facilitates using a Java class
-             * as a database type.
+             * The JDBC type JAVA_OBJECT, added in the JDBC 2.0 core API, makes it easier to use objects in the Java
+             * programming language as values in a database. JAVA_OBJECT is simply a type code for an instance of a
+             * class defined in the Java programming language that is stored as a database object. The type JAVA_OBJECT
+             * is used by a database whose type system has been extended so that it can store Java objects directly. The
+             * JAVA_OBJECT value may be stored as a serialized Java object, or it may be stored in some vendor-specific
+             * format. The type JAVA_OBJECT is one of the possible values for the column DATA_TYPE in the ResultSet
+             * objects returned by various DatabaseMetaData methods, including getTypeInfo, getColumns, and getUDTs. The
+             * method getUDTs, part of the new JDBC 2.0 core API, will return information about the Java objects
+             * contained in a particular schema when it is given the appropriate parameters. Having this information
+             * available facilitates using a Java class as a database type.
              */
             case Types.OTHER:
             case Types.JAVA_OBJECT: {
                 return result.getObject(i);
             }
             /**
-             * The JDBC type REAL represents a "single precision" floating point
-             * number that supports seven digits of mantissa.
-             *
-             * The corresponding SQL type REAL is defined in SQL-92 and is
-             * widely, though not universally, supported by the major databases.
-             * The SQL-92 standard leaves the precision of REAL up to the
-             * implementation, but in practice all the major databases
-             * supporting REAL support a mantissa precision of at least seven
-             * digits.
-             *
-             * The recommended Java mapping for the REAL type is as a Java
-             * float.
+             * The JDBC type REAL represents a "single precision" floating point number that supports seven digits of
+             * mantissa. The corresponding SQL type REAL is defined in SQL-92 and is widely, though not universally,
+             * supported by the major databases. The SQL-92 standard leaves the precision of REAL up to the
+             * implementation, but in practice all the major databases supporting REAL support a mantissa precision of
+             * at least seven digits. The recommended Java mapping for the REAL type is as a Java float.
              */
             case Types.REAL: {
                 String s = result.getString(i);
@@ -1752,42 +1651,26 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 return number.doubleValue();
             }
             /**
-             * The JDBC type TINYINT represents an 8-bit integer value between 0
-             * and 255 that may be signed or unsigned.
-             *
-             * The corresponding SQL type, TINYINT, is currently supported by
-             * only a subset of the major databases. Portable code may therefore
-             * prefer to use the JDBC SMALLINT type, which is widely supported.
-             *
-             * The recommended Java mapping for the JDBC TINYINT type is as
-             * either a Java byte or a Java short. The 8-bit Java byte type
-             * represents a signed value from -128 to 127, so it may not always
-             * be appropriate for larger TINYINT values, whereas the 16-bit Java
-             * short will always be able to hold all TINYINT values.
+             * The JDBC type TINYINT represents an 8-bit integer value between 0 and 255 that may be signed or unsigned.
+             * The corresponding SQL type, TINYINT, is currently supported by only a subset of the major databases.
+             * Portable code may therefore prefer to use the JDBC SMALLINT type, which is widely supported. The
+             * recommended Java mapping for the JDBC TINYINT type is as either a Java byte or a Java short. The 8-bit
+             * Java byte type represents a signed value from -128 to 127, so it may not always be appropriate for larger
+             * TINYINT values, whereas the 16-bit Java short will always be able to hold all TINYINT values.
              */
             /**
-             * The JDBC type SMALLINT represents a 16-bit signed integer value
-             * between -32768 and 32767.
-             *
-             * The corresponding SQL type, SMALLINT, is defined in SQL-92 and is
-             * supported by all the major databases. The SQL-92 standard leaves
-             * the precision of SMALLINT up to the implementation, but in
-             * practice, all the major databases support at least 16 bits.
-             *
-             * The recommended Java mapping for the JDBC SMALLINT type is as a
-             * Java short.
+             * The JDBC type SMALLINT represents a 16-bit signed integer value between -32768 and 32767. The
+             * corresponding SQL type, SMALLINT, is defined in SQL-92 and is supported by all the major databases. The
+             * SQL-92 standard leaves the precision of SMALLINT up to the implementation, but in practice, all the major
+             * databases support at least 16 bits. The recommended Java mapping for the JDBC SMALLINT type is as a Java
+             * short.
              */
             /**
-             * The JDBC type INTEGER represents a 32-bit signed integer value
-             * ranging between -2147483648 and 2147483647.
-             *
-             * The corresponding SQL type, INTEGER, is defined in SQL-92 and is
-             * widely supported by all the major databases. The SQL-92 standard
-             * leaves the precision of INTEGER up to the implementation, but in
-             * practice all the major databases support at least 32 bits.
-             *
-             * The recommended Java mapping for the INTEGER type is as a Java
-             * int.
+             * The JDBC type INTEGER represents a 32-bit signed integer value ranging between -2147483648 and
+             * 2147483647. The corresponding SQL type, INTEGER, is defined in SQL-92 and is widely supported by all the
+             * major databases. The SQL-92 standard leaves the precision of INTEGER up to the implementation, but in
+             * practice all the major databases support at least 32 bits. The recommended Java mapping for the INTEGER
+             * type is as a Java int.
              */
             case Types.TINYINT:
             case Types.SMALLINT:
@@ -1810,41 +1693,25 @@ public class StandardSource<C extends StandardContext> implements JDBCSource<C> 
                 return null;
             }
             /**
-             * The JDBC type DISTINCT field (Types class)>DISTINCT represents
-             * the SQL3 type DISTINCT.
-             *
-             * The standard mapping for a DISTINCT type is to the Java type to
-             * which the base type of a DISTINCT object would be mapped. For
-             * example, a DISTINCT type based on a CHAR would be mapped to a
-             * String object, and a DISTINCT type based on an SQL INTEGER would
-             * be mapped to an int.
-             *
-             * The DISTINCT type may optionally have a custom mapping to a class
-             * in the Java programming language. A custom mapping consists of a
-             * class that implements the interface SQLData and an entry in a
-             * java.util.Map object.
+             * The JDBC type DISTINCT field (Types class)>DISTINCT represents the SQL3 type DISTINCT. The standard
+             * mapping for a DISTINCT type is to the Java type to which the base type of a DISTINCT object would be
+             * mapped. For example, a DISTINCT type based on a CHAR would be mapped to a String object, and a DISTINCT
+             * type based on an SQL INTEGER would be mapped to an int. The DISTINCT type may optionally have a custom
+             * mapping to a class in the Java programming language. A custom mapping consists of a class that implements
+             * the interface SQLData and an entry in a java.util.Map object.
              */
             case Types.DISTINCT: {
                 logger.warn("JDBC type not implemented: {}", type);
                 return null;
             }
             /**
-             * The JDBC type STRUCT represents the SQL99 structured type. An SQL
-             * structured type, which is defined by a user with a CREATE TYPE
-             * statement, consists of one or more attributes. These attributes
-             * may be any SQL data type, built-in or user-defined.
-             *
-             * The standard mapping for the SQL type STRUCT is to a Struct
-             * object in the Java programming language. A Struct object contains
-             * a value for each attribute of the STRUCT value it represents.
-             *
-             * A STRUCT value may optionally be custom mapped to a class in the
-             * Java programming language, and each attribute in the STRUCT may
-             * be mapped to a field in the class. A custom mapping consists of a
-             * class that implements the interface SQLData and an entry in a
-             * java.util.Map object.
-             *
-             *
+             * The JDBC type STRUCT represents the SQL99 structured type. An SQL structured type, which is defined by a
+             * user with a CREATE TYPE statement, consists of one or more attributes. These attributes may be any SQL
+             * data type, built-in or user-defined. The standard mapping for the SQL type STRUCT is to a Struct object
+             * in the Java programming language. A Struct object contains a value for each attribute of the STRUCT value
+             * it represents. A STRUCT value may optionally be custom mapped to a class in the Java programming
+             * language, and each attribute in the STRUCT may be mapped to a field in the class. A custom mapping
+             * consists of a class that implements the interface SQLData and an entry in a java.util.Map object.
              */
             case Types.STRUCT: {
                 logger.warn("JDBC type not implemented: {}", type);

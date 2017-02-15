@@ -15,9 +15,16 @@
  */
 package org.xbib.elasticsearch.jdbc.strategy.standard;
 
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesAction;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
@@ -34,6 +41,8 @@ import org.elasticsearch.index.VersionType;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbib.elasticsearch.common.metrics.SinkMetric;
 import org.xbib.elasticsearch.common.util.ControlKeys;
 import org.xbib.elasticsearch.common.util.IndexableObject;
@@ -41,33 +50,23 @@ import org.xbib.elasticsearch.helper.client.ClientAPI;
 import org.xbib.elasticsearch.helper.client.ClientBuilder;
 import org.xbib.elasticsearch.jdbc.strategy.Sink;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
-
 /**
- * Standard sink implementation. This implementation uses bulk processing,
- * index name housekeeping (with replica/refresh), and metrics. It understands
- * _version, _routing, _timestamp, _parent, and _ttl metadata.
+ * Standard sink implementation. This implementation uses bulk processing, index name housekeeping (with
+ * replica/refresh), and metrics. It understands _version, _routing, _timestamp, _parent, and _ttl metadata.
  */
 public class StandardSink<C extends StandardContext> implements Sink<C> {
 
-    private final static Logger logger = LogManager.getLogger("importer.jdbc.sink.standard");
+    private static final Logger     logger     = LoggerFactory.getLogger("importer.jdbc.sink.standard");
 
-    protected C context;
+    protected C                     context;
 
-    protected ClientAPI clientAPI;
+    protected ClientAPI             clientAPI;
 
-    protected String index;
+    protected String                index;
 
-    protected String type;
+    protected String                type;
 
-    protected String id;
+    protected String                id;
 
     private final static SinkMetric sinkMetric = new SinkMetric().start();
 
@@ -202,13 +201,9 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
         if (Strings.hasLength(object.id())) {
             setId(object.id());
         }
-        IndexRequest request = Requests.indexRequest(this.index)
-                .type(this.type)
-                .id(getId())
-                .source(object.build());
+        IndexRequest request = Requests.indexRequest(this.index).type(this.type).id(getId()).source(object.build());
         if (object.meta(ControlKeys._version.name()) != null) {
-            request.versionType(VersionType.EXTERNAL)
-                    .version(Long.parseLong(object.meta(ControlKeys._version.name())));
+            request.versionType(VersionType.EXTERNAL).version(Long.parseLong(object.meta(ControlKeys._version.name())));
         }
         if (object.meta(ControlKeys._routing.name()) != null) {
             request.routing(object.meta(ControlKeys._routing.name()));
@@ -247,8 +242,7 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
         }
         DeleteRequest request = Requests.deleteRequest(this.index).type(this.type).id(getId());
         if (object.meta(ControlKeys._version.name()) != null) {
-            request.versionType(VersionType.EXTERNAL)
-                    .version(Long.parseLong(object.meta(ControlKeys._version.name())));
+            request.versionType(VersionType.EXTERNAL).version(Long.parseLong(object.meta(ControlKeys._version.name())));
         }
         if (object.meta(ControlKeys._routing.name()) != null) {
             request.routing(object.meta(ControlKeys._routing.name()));
@@ -283,8 +277,7 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
         request.docAsUpsert(true);
 
         if (object.meta(ControlKeys._version.name()) != null) {
-            request.versionType(VersionType.EXTERNAL)
-                    .version(Long.parseLong(object.meta(ControlKeys._version.name())));
+            request.versionType(VersionType.EXTERNAL).version(Long.parseLong(object.meta(ControlKeys._version.name())));
         }
         if (object.meta(ControlKeys._routing.name()) != null) {
             request.routing(object.meta(ControlKeys._routing.name()));
@@ -316,19 +309,39 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
     }
 
     private ClientAPI createClient(Settings settings) {
-        String clusterName = System.getProperty("ELASTICSEARCH_CLUSTER","es");
-        String clusterHost = System.getProperty("ELASTICSEARCH_CLUSTER_HOST","10.42.61.41");
+        String clusterName = System.getProperty("ELASTICSEARCH_CLUSTER", "es");
+        String clusterHost = System.getProperty("ELASTICSEARCH_CLUSTER_HOST", "10.42.61.41");
         String[] clusterHosts = StringUtils.split(clusterHost, ",");
-        Settings.Builder settingsBuilder = Settings.settingsBuilder()
-                .put("cluster.name", settings.get("elasticsearch.cluster.name", settings.get("elasticsearch.cluster", clusterName)))
-                .putArray("host", settings.getAsArray("elasticsearch.host",clusterHosts))
-                .put("port", settings.getAsInt("elasticsearch.port", 9300))
-                .put("sniff", settings.getAsBoolean("elasticsearch.sniff", false))
-                .put("autodiscover", settings.getAsBoolean("elasticsearch.autodiscover", false))
-                .put("name", "importer") // prevents lookup of names.txt, we don't have it
-                .put("client.transport.ignore_cluster_name", false) // ignore cluster name setting
-                .put("client.transport.ping_timeout", settings.getAsTime("elasticsearch.timeout", TimeValue.timeValueSeconds(5))) //  ping timeout
-                .put("client.transport.nodes_sampler_interval", settings.getAsTime("elasticsearch.timeout", TimeValue.timeValueSeconds(5))); // for sniff sampling
+        Settings.Builder settingsBuilder = Settings.settingsBuilder().put("cluster.name",
+                                                                          settings.get("elasticsearch.cluster.name",
+                                                                                       settings.get("elasticsearch.cluster",
+                                                                                                    clusterName))).putArray("host",
+                                                                                                                            settings.getAsArray("elasticsearch.host",
+                                                                                                                                                clusterHosts)).put("port",
+                                                                                                                                                                   settings.getAsInt("elasticsearch.port",
+                                                                                                                                                                                     9300)).put("sniff",
+                                                                                                                                                                                                settings.getAsBoolean("elasticsearch.sniff",
+                                                                                                                                                                                                                      false)).put("autodiscover",
+                                                                                                                                                                                                                                  settings.getAsBoolean("elasticsearch.autodiscover",
+                                                                                                                                                                                                                                                        false)).put("name",
+                                                                                                                                                                                                                                                                    "importer") // prevents
+                                                                                                                                                                                                                                                                                // lookup
+                                                                                                                                                                                                                                                                                // of
+                                                                                                                                                                                                                                                                                // names.txt,
+                                                                                                                                                                                                                                                                                // we
+                                                                                                                                                                                                                                                                                // don't
+                                                                                                                                                                                                                                                                                // have
+                                                                                                                                                                                                                                                                                // it
+                                                   .put("client.transport.ignore_cluster_name", false) // ignore cluster
+                                                                                                       // name setting
+                                                   .put("client.transport.ping_timeout",
+                                                        settings.getAsTime("elasticsearch.timeout",
+                                                                           TimeValue.timeValueSeconds(5))) // ping
+                                                                                                           // timeout
+                                                   .put("client.transport.nodes_sampler_interval",
+                                                        settings.getAsTime("elasticsearch.timeout",
+                                                                           TimeValue.timeValueSeconds(5))); // for sniff
+                                                                                                            // sampling
         // optional found.no transport plugin
         if (settings.get("transport.type") != null) {
             settingsBuilder.put("transport.type", settings.get("transport.type"));
@@ -336,20 +349,22 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
         // copy found.no transport settings
         Settings foundTransportSettings = settings.getAsSettings("transport.found");
         if (foundTransportSettings != null) {
-            Map<String,String> foundTransportSettingsMap = foundTransportSettings.getAsMap();
-            for (Map.Entry<String,String> entry : foundTransportSettingsMap.entrySet()) {
+            Map<String, String> foundTransportSettingsMap = foundTransportSettings.getAsMap();
+            for (Map.Entry<String, String> entry : foundTransportSettingsMap.entrySet()) {
                 settingsBuilder.put("transport.found." + entry.getKey(), entry.getValue());
             }
         }
-        return ClientBuilder.builder()
-                .put(settingsBuilder.build())
-                .put(ClientBuilder.MAX_ACTIONS_PER_REQUEST, settings.getAsInt("max_bulk_actions", 10000))
-                .put(ClientBuilder.MAX_CONCURRENT_REQUESTS, settings.getAsInt("max_concurrent_bulk_requests",
-                        Runtime.getRuntime().availableProcessors() * 2))
-                .put(ClientBuilder.MAX_VOLUME_PER_REQUEST, settings.getAsBytesSize("max_bulk_volume", ByteSizeValue.parseBytesSizeValue("10m", "")))
-                .put(ClientBuilder.FLUSH_INTERVAL, settings.getAsTime("flush_interval", TimeValue.timeValueSeconds(5)))
-                .setMetric(sinkMetric)
-                .toBulkTransportClient();
+        return ClientBuilder.builder().put(settingsBuilder.build()).put(ClientBuilder.MAX_ACTIONS_PER_REQUEST,
+                                                                        settings.getAsInt("max_bulk_actions",
+                                                                                          10000)).put(ClientBuilder.MAX_CONCURRENT_REQUESTS,
+                                                                                                      settings.getAsInt("max_concurrent_bulk_requests",
+                                                                                                                        Runtime.getRuntime().availableProcessors()
+                                                                                                                                                        * 2)).put(ClientBuilder.MAX_VOLUME_PER_REQUEST,
+                                                                                                                                                                  settings.getAsBytesSize("max_bulk_volume",
+                                                                                                                                                                                          ByteSizeValue.parseBytesSizeValue("10m",
+                                                                                                                                                                                                                            ""))).put(ClientBuilder.FLUSH_INTERVAL,
+                                                                                                                                                                                                                                      settings.getAsTime("flush_interval",
+                                                                                                                                                                                                                                                         TimeValue.timeValueSeconds(5))).setMetric(sinkMetric).toBulkTransportClient();
     }
 
     private void createIndex(Settings settings, String index, String type) throws IOException {
@@ -361,7 +376,7 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
                 clientAPI.waitForCluster("YELLOW", TimeValue.timeValueSeconds(30));
                 if (settings.getAsStructuredMap().containsKey("index_settings")) {
                     Settings indexSettings = settings.getAsSettings("index_settings");
-                    Map<String,String> mappings = new HashMap<>();
+                    Map<String, String> mappings = new HashMap<>();
                     if (type != null) {
                         Settings typeMapping = settings.getAsSettings("type_mapping");
                         XContentBuilder builder = jsonBuilder();
@@ -374,10 +389,12 @@ public class StandardSink<C extends StandardContext> implements Sink<C> {
                     clientAPI.newIndex(index, indexSettings, mappings);
                     logger.info("index created");
                     long startRefreshInterval = indexSettings.getAsTime("bulk." + index + ".refresh_interval.start",
-                                    TimeValue.timeValueMillis(-1L)).getMillis();
+                                                                        TimeValue.timeValueMillis(-1L)).getMillis();
                     long stopRefreshInterval = indexSettings.getAsTime("bulk." + index + ".refresh_interval.stop",
-                                    indexSettings.getAsTime("index.refresh_interval", TimeValue.timeValueSeconds(1))).getMillis();
-                    logger.info("start bulk mode, refresh at start = {}, refresh at stop = {}", startRefreshInterval, stopRefreshInterval);
+                                                                       indexSettings.getAsTime("index.refresh_interval",
+                                                                                               TimeValue.timeValueSeconds(1))).getMillis();
+                    logger.info("start bulk mode, refresh at start = {}, refresh at stop = {}", startRefreshInterval,
+                                stopRefreshInterval);
                     clientAPI.startBulk(index, startRefreshInterval, stopRefreshInterval);
                 }
             } catch (Exception e) {

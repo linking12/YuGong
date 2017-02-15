@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
@@ -34,8 +34,7 @@ import com.quancheng.yugong.vo.SyncTaskVO;
 @Service
 public class TaskBizService {
 
-    private final static Logger       logger = LogManager.getLogger("taskBizService.default");
-
+    private static final Logger       logger = LoggerFactory.getLogger(TaskBizService.class);
     @Autowired
     private SyncTaskStateDao          stateDao;
 

@@ -35,10 +35,10 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.TimeValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbib.elasticsearch.common.cron.CronExpression;
 import org.xbib.elasticsearch.common.cron.CronThreadPoolExecutor;
 import org.xbib.elasticsearch.common.util.StrategyLoader;
@@ -53,7 +53,7 @@ import com.quancheng.yugong.dto.SyncTaskStateDTO;
 
 public class JDBCImporter extends AbstractPipeline<SettingAndSyncTaskDTOPipelineRequest> implements Runnable, CommandLineInterpreter {
 
-    private final static Logger logger   = LogManager.getLogger("importer.jdbc");
+    private static final Logger logger   = LoggerFactory.getLogger("importer.jdbc");
 
     private Context             context;
 

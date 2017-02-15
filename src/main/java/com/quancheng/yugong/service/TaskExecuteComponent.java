@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xbib.tools.JDBCImporter;
@@ -37,7 +37,7 @@ import com.quancheng.yugong.repository.entity.SyncTaskDO;
 @Component
 public class TaskExecuteComponent {
 
-    private final static Logger            logger               = LogManager.getLogger("taskExecute.default");
+    private static final Logger       logger = LoggerFactory.getLogger(TaskExecuteComponent.class);
 
     @Autowired
     private SyncTaskDao                    taskDao;

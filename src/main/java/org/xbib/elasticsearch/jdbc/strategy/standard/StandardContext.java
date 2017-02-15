@@ -17,10 +17,7 @@ package org.xbib.elasticsearch.jdbc.strategy.standard;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -30,8 +27,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.elasticsearch.common.joda.FormatDateTimeFormatter;
 import org.elasticsearch.common.joda.Joda;
 import org.elasticsearch.common.settings.Settings;
@@ -39,6 +34,8 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.support.XContentMapValues;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xbib.elasticsearch.common.metrics.MetricsLogger;
 import org.xbib.elasticsearch.common.util.LocaleUtil;
 import org.xbib.elasticsearch.common.util.SQLCommand;
@@ -55,7 +52,7 @@ import com.quancheng.yugong.dto.SyncTaskDTO;
  */
 public class StandardContext<S extends JDBCSource> implements Context<S, Sink> {
 
-    private final static Logger       logger  = LogManager.getLogger("importer.jdbc.context.standard");
+    private static final Logger       logger  = LoggerFactory.getLogger("importer.jdbc.context.standard");
 
     private Settings                  settings;
 

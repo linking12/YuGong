@@ -7,14 +7,13 @@
  */
 package com.quancheng.yugong.service;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -24,7 +23,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +37,7 @@ import org.springframework.stereotype.Component;
 @Component("LoginFilter")
 public class LoginComponent implements Filter {
 
-    private final static Logger logger    = LogManager.getLogger("login.default");
+    private static final Logger logger    = LoggerFactory.getLogger(LoginComponent.class);
 
     @Value("${ucenter.server.host}")
     private String              url       = "";

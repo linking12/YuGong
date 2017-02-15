@@ -3,6 +3,11 @@ buildscript {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE")
     }
 }
+repositories {
+    maven {
+	        url "http://xbib.org/repository"
+	}
+}
 apply plugin: 'java'
 apply plugin: 'spring-boot'
 ext {

@@ -28,6 +28,11 @@
                                     添加
                                 </button>
                             </div>
+                            <div class="col-sm-1">
+                                <button class="btn btn-warning" type="reset" id="resetBtn">
+                                    重置
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>

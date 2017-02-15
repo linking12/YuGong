@@ -1,12 +1,15 @@
 # 概述
 
 yugong是一个将数据库的数据同步到ElasticSearch的一个web系统
+集成了ElasticSearchJdbc(https://github.com/jprante/elasticsearch-jdbc),并对其做了改造
 
 # 功能
 
 * 提供同步能力
 
 # 开发说明
+
+* 项目使用的持久化ORM是使用jpa，包括了数据库的表结构的生成，唯一性约束，主外键等的一系列数据库操作
 
 * 类似于定时任务调度中心，需要解决的是分布式锁的问题，本系统使用的分布式锁是使用数据库的GET_LOCK来实现
 

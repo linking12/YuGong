@@ -4,6 +4,9 @@ buildscript {
     }
 }
 repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
     maven {
 	        url "http://xbib.org/repository"
 	}
@@ -17,7 +20,8 @@ ext {
       'log4j': '2.5',
       'wagon' : '2.10',
       'mysql' : '5.1.38',
-      'jts' : '1.13'
+      'jts' : '1.13',
+      'jdbc-driver-csv': '1.0.0'
     ]
 }
 configurations {
@@ -28,6 +32,9 @@ dependencies {
     compile 'org.xbib.elasticsearch.plugin:elasticsearch-helper:' + versions.'elasticsearch-helper'
     compile('com.vividsolutions:jts:' + versions.jts) {
         exclude group: 'xerces'
+    }
+    compile('org.xbib.jdbc:jdbc-driver-csv:' + versions.'jdbc-driver-csv') {
+        exclude group: 'org.apache.logging.log4j'
     }
     compile 'mysql:mysql-connector-java:' + versions.mysql
     compile 'org.apache.maven.wagon:wagon-ssh-external:' + versions.wagon

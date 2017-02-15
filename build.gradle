@@ -1,3 +1,6 @@
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+
 buildscript {
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE")
@@ -11,8 +14,6 @@ repositories {
 	        url "http://xbib.org/repository"
 	}
 }
-apply plugin: 'java'
-apply plugin: 'spring-boot'
 ext {
     versions = [
       'elasticsearch' : '2.3.4',

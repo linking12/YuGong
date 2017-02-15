@@ -45,7 +45,7 @@ public class SyncTaskDTO {
     }
 
     public String getSetting() {
-        return this.setting;
+        return setting;
     }
 
     public Settings getConfigSetting() {

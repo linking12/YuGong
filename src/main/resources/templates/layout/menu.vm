@@ -5,7 +5,7 @@
                 <div class="dropdown profile-element">
                     <div class="env-element" id="current-env" env="daily">愚公管理后台</div>
                 </div>
-                <div class="logo-element">LTS</div>
+                <div class="logo-element">YuGong</div>
             </li>
             <li>
                 <a href="/jobs"><i class="fa fa-th"></i> <span class="nav-label">查看任务</span>

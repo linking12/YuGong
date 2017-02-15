@@ -27,5 +27,5 @@ yugong是一个将数据库的数据同步到ElasticSearch的一个web系统
 
 * http：//yugong.dev.quancheng-ec.com
 
-* 添加spring-boot-saluki依赖
+* 添加任务
 

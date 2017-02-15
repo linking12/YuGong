@@ -34,13 +34,13 @@ import com.quancheng.yugong.vo.SyncTaskVO;
 @Service
 public class TaskBizService {
 
-    private final static Logger     logger = LogManager.getLogger("syncTaskService.default");
+    private final static Logger       logger = LogManager.getLogger("taskBizService.default");
 
     @Autowired
-    private SyncTaskStateDao        stateDao;
+    private SyncTaskStateDao          stateDao;
 
     @Autowired
-    private SyncTaskDao             taskDao;
+    private SyncTaskDao               taskDao;
 
     @Autowired
     private TaskLocalStoregeComponent taskLocalStoreService;
@@ -48,7 +48,7 @@ public class TaskBizService {
     @Autowired
     private TaskExecuteComponent      excutorTaskService;
 
-    private Object                  lock   = new Object();
+    private Object                    lock   = new Object();
 
     private String getLocalHost() {
         try {

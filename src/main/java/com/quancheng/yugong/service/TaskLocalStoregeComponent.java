@@ -31,7 +31,7 @@ import com.quancheng.yugong.repository.DistributedLock;
 @Component
 public class TaskLocalStoregeComponent {
 
-    private final static Logger                    logger                  = LogManager.getLogger("syncTaskService.default");
+    private final static Logger                    logger                  = LogManager.getLogger("taskLocalStorege.default");
 
     private final static String                    SPECIAL_SPLIT_CHARACTER = "-";
 

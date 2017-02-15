@@ -37,7 +37,7 @@ import com.quancheng.yugong.repository.entity.SyncTaskDO;
 @Component
 public class TaskExecuteComponent {
 
-    private final static Logger            logger               = LogManager.getLogger("syncTaskService.default");
+    private final static Logger            logger               = LogManager.getLogger("taskExecute.default");
 
     @Autowired
     private SyncTaskDao                    taskDao;

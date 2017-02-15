@@ -38,7 +38,7 @@ public class CancelJobController {
         PageWrapper<SyncTaskVO> page = new PageWrapper<SyncTaskVO>(tasks, "/cancelJobs");
         model.addAttribute("jobs", page.getContent());
         model.addAttribute("page", page);
-        return "/task/canceltasks";
+        return "task/canceltasks";
     }
 
     @RequestMapping(value = "/cancel/{taskId}", method = RequestMethod.GET)

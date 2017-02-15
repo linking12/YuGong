@@ -38,7 +38,7 @@ public class DeleteJobController {
         PageWrapper<SyncTaskVO> page = new PageWrapper<SyncTaskVO>(tasks, "/deleteJobs");
         model.addAttribute("jobs", page.getContent());
         model.addAttribute("page", page);
-        return "/task/deletetasks";
+        return "task/deletetasks";
     }
     
     @RequestMapping(value = "/delete/{taskId}", method = RequestMethod.GET)

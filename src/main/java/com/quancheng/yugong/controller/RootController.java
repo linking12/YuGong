@@ -21,6 +21,6 @@ public class RootController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ModelAndView index() {
-        return new ModelAndView("/index");
+        return new ModelAndView("index");
     }
 }

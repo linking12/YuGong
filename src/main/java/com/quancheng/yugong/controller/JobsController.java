@@ -37,7 +37,7 @@ public class JobsController {
         PageWrapper<SyncTaskVO> page = new PageWrapper<SyncTaskVO>(tasks, "/jobs");
         model.addAttribute("jobs", page.getContent());
         model.addAttribute("page", page);
-        return "/task/tasks";
+        return "task/tasks";
     }
     
     

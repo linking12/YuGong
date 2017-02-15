@@ -11,7 +11,7 @@ build_image:
     - echo `git rev-parse --short HEAD` >> bin/git.tag
     - echo $image
     - if [ "`docker images | awk '/^nexus.quancheng-ec.com:5000/ { print $3 }'`" ]; then docker rmi -f $(docker images | awk '/^nexus.quancheng-ec.com:5000/ { print $3 }' ); fi
-    - gradle clean build --refresh-dependencies
+    - gradle clean build -x test --refresh-dependencies 
     - echo "Build Docker Image..."
     - docker build --no-cache -t $aliimage .
     - echo "Push Image:" $aliimage " to repository..."

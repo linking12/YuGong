@@ -246,79 +246,50 @@ scheduler javadoc page.</p>
 <p>Cron expressions are comprised of 6 required fields and one optional field separated by
 white space. The fields respectively are described as follows:</p>
 
-<p>| Field Name      | Allowed Values      | Allowed Special Characters  |
-| --------------- | ------------------- | ----------------------------|
-| Seconds         | 0-59                | , - <em> / |
-| Minutes         | 0-59                | , - </em> / |
-| Hours           | 0-23                | , - <em> / |
-| Day-of-month    | 1-31                | , - </em> ? / L W |
-| Month           | 1-12 or JAN-DEC     | , - <em> / |
-| Day-of-Week     | 1-7 or SUN-SAT      | , - </em> ? / L # |
-| Year (Optional) | empty, 1970-2199    | , - * / |</p>
 
-<p>The &#39;<em>&#39; character is used to specify all values. For example, &quot;</em>&quot; in the minute field means &quot;every minute&quot;.</p>
-
-<p>The &#39;?&#39; character is allowed for the day-of-month and day-of-week fields.
-It is used to specify &#39;no specific value&#39;.
-This is useful when you need to specify something in one of the two fields, but not the other.</p>
-
-<p>The &#39;-&#39; character is used to specify ranges For example &quot;10-12&quot; in the hour field means
-&quot;the hours 10, 11 and 12&quot;.</p>
-
-<p>The &#39;,&#39; character is used to specify additional values. For example &quot;MON,WED,FRI&quot; in the
-day-of-week field means &quot;the days Monday, Wednesday, and Friday&quot;.</p>
-
-<p>The &#39;/&#39; character is used to specify increments. For example &quot;0/15&quot; in the seconds field means
-&quot;the seconds 0, 15, 30, and 45&quot;. And &quot;5/15&quot; in the seconds field means &quot;the seconds 5, 20, 35, and 50&quot;.
-Specifying &#39;*&#39; before the &#39;/&#39; is equivalent to specifying 0 is the value to start with.
-Essentially, for each field in the expression, there is a set of numbers that can be turned on or off.
-For seconds and minutes, the numbers range from 0 to 59.
-For hours 0 to 23, for days of the month 0 to 31, and for months 1 to 12.
-The &quot;/&quot; character simply helps you turn on every &quot;nth&quot; value in the given set.
-Thus &quot;7/6&quot; in the month field only turns on month &quot;7&quot;, it does NOT mean every 6th month,
-please note that subtlety.</p>
-
-<p>The &#39;L&#39; character is allowed for the day-of-month and day-of-week fields.
-This character is short-hand for &quot;last&quot;, but it has different meaning in each of the two fields.
-For example, the value &quot;L&quot; in the day-of-month field means &quot;the last day of the month&quot; - day
-31 for January, day 28 for February on non-leap years. If used in the day-of-week field by itself,
-it simply means &quot;7&quot; or &quot;SAT&quot;. But if used in the day-of-week field after another value,
-it means &quot;the last xxx day of the month&quot; - for example &quot;6L&quot; means &quot;the last friday of the month&quot;.
-You can also specify an offset from the last day of the month, such as &quot;L-3&quot; which would mean
-the third-to-last day of the calendar month. When using the &#39;L&#39; option, it is important not
-to specify lists, or ranges of values, as you&#39;ll get confusing/unexpected results.</p>
-
-<p>The &#39;W&#39; character is allowed for the day-of-month field. This character is used to specify
-the weekday (Monday-Friday) nearest the given day. As an example, if you were to specify &quot;15W&quot;
-as the value for the day-of-month field, the meaning is: &quot;the nearest weekday to the 15th of the month&quot;.
-So if the 15th is a Saturday, the trigger will fire on Friday the 14th.
-If the 15th is a Sunday, the trigger will fire on Monday the 16th.
-If the 15th is a Tuesday, then it will fire on Tuesday the 15th.
-However if you specify &quot;1W&quot; as the value for day-of-month, and the 1st is a Saturday,
-the trigger will fire on Monday the 3rd, as it will not &#39;jump&#39; over the boundary of a month&#39;s days.
-The &#39;W&#39; character can only be specified when the day-of-month is a single day,
-not a range or list of days.</p>
-
-<p>The &#39;L&#39; and &#39;W&#39; characters can also be combined for the day-of-month expression to yield &#39;LW&#39;,
-which translates to &quot;last weekday of the month&quot;.</p>
-
-<p>The &#39;#&#39; character is allowed for the day-of-week field. This character is used to specify
-&quot;the nth&quot; XXX day of the month. For example, the value of &quot;6#3&quot; in the day-of-week field means
-the third Friday of the month (day 6 = Friday and &quot;#3&quot; = the 3rd one in the month).
-Other examples: &quot;2#1&quot; = the first Monday of the month and &quot;4#5&quot; = the fifth Wednesday of the month.
-Note that if you specify &quot;#5&quot; and there is not 5 of the given day-of-week in the month,
-then no firing will occur that month. If the &#39;#&#39; character is used, there can only be
-one expression in the day-of-week field (&quot;3#1,6#3&quot; is not valid, since there are two expressions).</p>
-
-<p>The legal characters and the names of months and days of the week are not case sensitive.</p>
-
-<p>Note: Support for specifying both a day-of-week and a day-of-month value is not complete
-(you&#39;ll need to use the &#39;?&#39; character in one of these fields).
-Overflowing ranges is supported - that is, having a larger number on the left hand side than the right.
-You might do 22-2 to catch 10 o&#39;clock at night until 2 o&#39;clock in the morning, or you might have NOV-FEB.
-It is very important to note that overuse of overflowing ranges creates ranges that don&#39;t make sense
-and no effort has been made to determine which interpretation CronExpression chooses.
-An example would be &quot;0 0 14-6 ? * FRI-MON&quot;.</p>
+<table class="table"><thead>
+<tr>
+<th>Field Name</th>
+<th>Allowed Values</th>
+<th>Allowed Special Characters</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Seconds</td>
+<td>0-59</td>
+<td>, - * /</td>
+</tr>
+<tr>
+<td>Minutes</td>
+<td>0-59</td>
+<td>, - * /</td>
+</tr>
+<tr>
+<td>Hours</td>
+<td>0-23</td>
+<td>, - * /</td>
+</tr>
+<tr>
+<td>Day-of-month</td>
+<td>1-31</td>
+<td>, - * ? / L W</td>
+</tr>
+<tr>
+<td>Month</td>
+<td>1-12 or JAN-DEC</td>
+<td>, - * /</td>
+</tr>
+<tr>
+<td>Day-of-Week</td>
+<td>1-7 or SUN-SAT</td>
+<td>, - * ? / L #</td>
+</tr>
+<tr>
+<td>Year (Optional)</td>
+<td>empty, 1970-2199</td>
+<td>, - * /</td>
+</tr>
+</tbody></table>
 
 <h2>Structured objects</h2>
 
@@ -435,13 +406,45 @@ repetitions of the same group. Fortunately, this is harmless to Elasticsearch qu
 
 <p>Example:</p>
 
-<p>| _id  | blog.name | blog.published      | blog.association[id] | blog.association[name] | blog.attachment[id]   | blog.attachment[name]    |
-| ---- | ----------| --------------------| -------------------- | ---------------------- | --------------------- | ------------------------ |
-| 4679 | Joe       | 2014-01-06 00:00:00 | 3917                 | John                   | 9450                  | /web/q/g/h/57436356.jpg  |
-| 4679 | Joe       | 2014-01-06 00:00:00 | 3917                 | John                   | 9965                  | /web/i/s/q/GS3193626.jpg |
-| 4679 | Joe       | 2014-01-06 00:00:00 | 3917                 | John                   | 9451                  | /web/i/s/q/GS3193626.jpg |</p>
-
-<p>Result:</p>
+<table class="table"><thead>
+<tr>
+<th>_id</th>
+<th>blog.name</th>
+<th>blog.published</th>
+<th>blog.association[id]</th>
+<th>blog.association[name]</th>
+<th>blog.attachment[id]</th>
+<th>blog.attachment[name]</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>4679</td>
+<td>Joe</td>
+<td>2014-01-06 00:00:00</td>
+<td>3917</td>
+<td>John</td>
+<td>9450</td>
+<td>/web/q/g/h/57436356.jpg</td>
+</tr>
+<tr>
+<td>4679</td>
+<td>Joe</td>
+<td>2014-01-06 00:00:00</td>
+<td>3917</td>
+<td>John</td>
+<td>9965</td>
+<td>/web/i/s/q/GS3193626.jpg</td>
+</tr>
+<tr>
+<td>4679</td>
+<td>Joe</td>
+<td>2014-01-06 00:00:00</td>
+<td>3917</td>
+<td>John</td>
+<td>9451</td>
+<td>/web/i/s/q/GS3193626.jpg</td>
+</tr>
+</tbody></table>
 
 <pre><code>{
     &quot;blog&quot; : {
@@ -1081,21 +1084,3 @@ but in the JDBC connection properties. You can specifiy connection properties li
         }
     }
 }</code></pre>
-
-<h1>License</h1>
-
-<p>Elasticsearch JDBC Importer</p>
-
-<p>Copyright (C) 2012-2015 Jörg Prante</p>
-
-<p>Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at</p>
-
-<pre><code>http://www.apache.org/licenses/LICENSE-2.0</code></pre>
-
-<p>Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.</p>

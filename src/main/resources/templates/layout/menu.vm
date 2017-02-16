@@ -21,7 +21,7 @@
                 <a href="/deleteJobs"><i class="fa fa-bar-chart"></i><span class="nav-label">删除任务</span></a>
             </li>
             <li>
-                <a href="/upload"><i class="fa fa-th"></i><span class="nav-label">上传文件</span></a>
+                <a href="/uploadList"><i class="fa fa-th"></i><span class="nav-label">文件列表</span></a>
             </li>
         </ul>
     </div>

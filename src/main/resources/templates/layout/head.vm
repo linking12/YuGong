@@ -27,5 +27,5 @@
 <link href="/js/plugins/jqueryui/jquery-ui-1.10.3.custom.css" rel="stylesheet">
 <script src="/js/plugins/jqueryui/jquery-ui-1.10.3.custom.min.js"></script>
 
-<script src="/js/plugins/fileinput/js/fileinput.min.js"></script>
-<link href="/js/plugins/fileinput/css/fileinput.min.css" rel="stylesheet">
+<script src="/js/plugins/fileinput/js/fileinput.js"></script>
+<link href="/js/plugins/fileinput/css/fileinput.css" rel="stylesheet">

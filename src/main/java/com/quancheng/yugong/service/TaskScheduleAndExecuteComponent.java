@@ -7,6 +7,7 @@
  */
 package com.quancheng.yugong.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.xbib.tools.JDBCImporter;
 
+import com.quancheng.yugong.common.Constants;
 import com.quancheng.yugong.common.NamedThreadFactory;
 import com.quancheng.yugong.dto.SyncTaskDTO;
 import com.quancheng.yugong.repository.SyncTaskDao;
@@ -35,9 +37,9 @@ import com.quancheng.yugong.repository.entity.SyncTaskDO;
  * @version RestartServiceImpl.java, v 0.0.1 2017年2月14日 下午4:41:38 shimingliu
  */
 @Component
-public class TaskExecuteComponent {
+public class TaskScheduleAndExecuteComponent {
 
-    private static final Logger       logger = LoggerFactory.getLogger(TaskExecuteComponent.class);
+    private static final Logger            logger               = LoggerFactory.getLogger(TaskScheduleAndExecuteComponent.class);
 
     @Autowired
     private SyncTaskDao                    taskDao;
@@ -46,7 +48,7 @@ public class TaskExecuteComponent {
     private SyncTaskStateDao               stateDao;
 
     @Autowired
-    private TaskLocalStoregeComponent        taskLocalStoreService;
+    private TaskLocalStoregeComponent      taskLocalStoreService;
 
     private final ScheduledExecutorService scheuledScanShutDown = Executors.newScheduledThreadPool(1);
 
@@ -62,12 +64,13 @@ public class TaskExecuteComponent {
             public void run() {
                 try {
                     scheduleDeleteTask();
+                    scheduleDeleteFile();
                 } catch (Throwable e) {
                     logger.error(e.getMessage(), e);
                 }
 
             }
-        }, 0, 30, TimeUnit.MINUTES);
+        }, 0, 12, TimeUnit.HOURS);
         initializatTask();
     }
 
@@ -77,6 +80,15 @@ public class TaskExecuteComponent {
             String index = shutDownTask.getLeft();
             String type = shutDownTask.getRight();
             taskLocalStoreService.delete(index, type);
+        }
+    }
+
+    private void scheduleDeleteFile() {
+        File file = new File(Constants.CSV_UPLOAD_DIR);
+        if (file != null && file.isDirectory()) {
+            for (File deleteFile : file.listFiles()) {
+                deleteFile.delete();
+            }
         }
     }
 

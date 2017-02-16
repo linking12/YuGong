@@ -45,7 +45,7 @@ public class TaskBizService {
     private TaskLocalStoregeComponent taskLocalStoreService;
 
     @Autowired
-    private TaskExecuteComponent      excutorTaskService;
+    private TaskScheduleAndExecuteComponent      excutorTaskService;
 
     private Object                    lock   = new Object();
 

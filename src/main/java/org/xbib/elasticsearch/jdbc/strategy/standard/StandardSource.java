@@ -69,77 +69,77 @@ import org.xbib.elasticsearch.jdbc.strategy.JDBCSource;
  */
 public class StandardSource<C extends StandardContext> implements JDBCSource<C> {
 
-    private static final Logger       logger                = LoggerFactory.getLogger("importer.jdbc.source.standard");
+    private static final Logger logger                = LoggerFactory.getLogger("importer.jdbc.source.standard");
 
-    protected C                       context;
+    protected C                 context;
 
-    protected String                  url;
+    protected String            url;
 
-    protected String                  user;
+    protected String            user;
 
-    protected String                  password;
+    protected String            password;
 
-    protected Connection              readConnection;
+    protected Connection        readConnection;
 
-    protected Connection              writeConnection;
+    protected Connection        writeConnection;
 
-    protected Locale                  locale;
+    protected Locale            locale;
 
-    protected TimeZone                timezone;
+    protected TimeZone          timezone;
 
-    protected Calendar                calendar;
+    protected Calendar          calendar;
 
-    protected DateTimeZone            dateTimeZone;
+    protected DateTimeZone      dateTimeZone;
 
-    private boolean                   autocommit;
+    private boolean             autocommit;
 
-    private int                       fetchSize;
+    private int                 fetchSize;
 
-    private int                       maxRows;
+    private int                 maxRows;
 
-    private int                       retries               = 1;
+    private int                 retries               = 1;
 
-    private TimeValue                 maxretrywait          = TimeValue.timeValueSeconds(30);
+    private TimeValue           maxretrywait          = TimeValue.timeValueSeconds(30);
 
-    private int                       rounding;
+    private int                 rounding;
 
-    private int                       scale                 = -1;
+    private int                 scale                 = -1;
 
-    private String                    resultSetType         = "TYPE_FORWARD_ONLY";
+    private String              resultSetType         = "TYPE_FORWARD_ONLY";
 
-    private String                    resultSetConcurrency  = "CONCUR_UPDATABLE";
+    private String              resultSetConcurrency  = "CONCUR_UPDATABLE";
 
-    private boolean                   shouldIgnoreNull;
+    private boolean             shouldIgnoreNull;
 
-    private boolean                   shouldDetectGeo;
+    private boolean             shouldDetectGeo;
 
-    private boolean                   shouldDetectJson;
+    private boolean             shouldDetectJson;
 
-    private boolean                   shouldPrepareResultSetMetadata;
+    private boolean             shouldPrepareResultSetMetadata;
 
-    private boolean                   shouldPrepareDatabaseMetadata;
+    private boolean             shouldPrepareDatabaseMetadata;
 
-    private Map<String, Object>       lastResultSetMetadata = new HashMap<String, Object>();
+    private Map<String, Object> lastResultSetMetadata = new HashMap<String, Object>();
 
-    private Map<String, Object>       lastDatabaseMetadata  = new HashMap<String, Object>();
+    private Map<String, Object> lastDatabaseMetadata  = new HashMap<String, Object>();
 
-    private long                      lastRowCount;
+    private long                lastRowCount;
 
-    private Map<String, Object>       columnNameMap;
+    private Map<String, Object> columnNameMap;
 
-    private Map<String, Object>       lastRow               = new HashMap<String, Object>();
+    private Map<String, Object> lastRow               = new HashMap<String, Object>();
 
-    private List<SQLCommand>          sql;
+    private List<SQLCommand>    sql;
 
-    private boolean                   isTimestampDiffSupported;
+    private boolean             isTimestampDiffSupported;
 
-    private int                       queryTimeout;
+    private int                 queryTimeout;
 
-    private Map<String, Object>       connectionProperties  = new HashMap<String, Object>();
+    private Map<String, Object> connectionProperties  = new HashMap<String, Object>();
 
-    private boolean                   shouldTreatBinaryAsString;
+    private boolean             shouldTreatBinaryAsString;
 
-    private final static SourceMetric sourceMetric          = new SourceMetric().start();
+    private final SourceMetric  sourceMetric          = new SourceMetric().start();
 
     @Override
     public String strategy() {

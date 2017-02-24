@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Component;
 import org.xbib.tools.JDBCImporter;
 
 import com.quancheng.yugong.common.Constants;
-import com.quancheng.yugong.common.NamedThreadFactory;
 import com.quancheng.yugong.dto.SyncTaskDTO;
 import com.quancheng.yugong.repository.SyncTaskDao;
 import com.quancheng.yugong.repository.SyncTaskStateDao;
@@ -51,10 +49,6 @@ public class TaskScheduleAndExecuteComponent {
     private TaskLocalStoregeComponent      taskLocalStoreService;
 
     private final ScheduledExecutorService scheuledScanShutDown = Executors.newScheduledThreadPool(1);
-
-    private final ExecutorService          syncTaskExecutor     = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(),
-                                                                                               new NamedThreadFactory("CheckServiceTimer",
-                                                                                                                      true));
 
     @PostConstruct
     public void init() {
@@ -120,13 +114,17 @@ public class TaskScheduleAndExecuteComponent {
     }
 
     public void executeTask(SyncTaskDTO syncTaskDTO, JDBCImporter importer) {
-        syncTaskExecutor.execute(new Runnable() {
+        Thread syncTask = new Thread() {
 
             @Override
             public void run() {
+                logger.info("*******begin to run task " + syncTaskDTO.getIndex() + "***********");
                 importer.run(syncTaskDTO);
+                logger.info("*******end to run task " + syncTaskDTO.getIndex() + "***********");
             }
-        });
+        };
+        syncTask.setName(syncTaskDTO.getIndex() + "-" + syncTaskDTO.getType() + "task");
+        syncTask.start();
     }
 
 }

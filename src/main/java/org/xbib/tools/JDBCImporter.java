@@ -275,7 +275,12 @@ public class JDBCImporter extends AbstractPipeline<SettingAndSyncTaskDTOPipeline
 
     private void execute() throws ExecutionException, InterruptedException {
         logger.debug("executing (queue={})", getQueue().size());
-        new SimplePipelineExecutor<SettingAndSyncTaskDTOPipelineRequest, Pipeline<SettingAndSyncTaskDTOPipelineRequest>>(executorService).setQueue(getQueue()).setPipelineProvider(pipelineProvider()).prepare().execute().waitFor();
+        new SimplePipelineExecutor<SettingAndSyncTaskDTOPipelineRequest, Pipeline<SettingAndSyncTaskDTOPipelineRequest>>(executorService)//
+                                                                                                                                         .setQueue(getQueue())//
+                                                                                                                                         .setPipelineProvider(pipelineProvider())//
+                                                                                                                                         .prepare()//
+                                                                                                                                         .execute()//
+                                                                                                                                         .waitFor();
         logger.debug("execution completed");
     }
 

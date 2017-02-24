@@ -97,7 +97,8 @@ public class TaskScheduleAndExecuteComponent {
         Iterator<SyncTaskDO> it = tasks.iterator();
         while (it.hasNext()) {
             SyncTaskDO taskDo = it.next();
-            if (!taskDo.getSyncTaskState().getIsCanceled()) {
+            boolean isNotRun = taskDo.getSyncTaskState() == null || !taskDo.getSyncTaskState().getIsCanceled();
+            if (isNotRun) {
                 saveAndRunTask(taskDo.getSetting());
             }
         }

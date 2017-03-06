@@ -6,9 +6,9 @@ RUN apk add --update curl && \
 ADD build/libs/yugong.jar /root/yugong.jar
 ADD bin /root/
 RUN chmod +x /root/*.sh;mkdir /root/logs
-RUN curl -O --user 'liushiming:Hello899' http://repo.quancheng-ec.com/repository/documentation/pinpoint-agent-1.6.1-SNAPSHOT.zip \
-	&& unzip ./pinpoint-agent-1.6.1-SNAPSHOT.zip -d . \
-    && rm -r ./pinpoint-agent-1.6.1-SNAPSHOT.zip
+RUN curl -o /root/pinpoint-agent-1.6.1-SNAPSHOT/pinpoint-agent-1.6.1-SNAPSHOT.zip --user 'liushiming:Hello899' http://repo.quancheng-ec.com/repository/documentation/pinpoint-agent-1.6.1-SNAPSHOT.zip \
+	&& unzip -o -d /root/pinpoint-agent-1.6.1-SNAPSHOT /root/pinpoint-agent-1.6.1-SNAPSHOT/pinpoint-agent-1.6.1-SNAPSHOT.zip \
+    && rm -r /root/pinpoint-agent-1.6.1-SNAPSHOT/pinpoint-agent-1.6.1-SNAPSHOT.zip
 ENV JAVA_OPTS ""
 WORKDIR /root
 CMD ["./start.sh"]

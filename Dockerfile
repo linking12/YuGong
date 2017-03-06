@@ -1,9 +1,10 @@
-FROM quancheng/runtime-image:1.1
+FROM java:8-jdk-alpine
 ENV TZ="Asia/Shanghai"
 ENV LANG C.UTF-8
 ADD build/libs/yugong.jar /root/yugong.jar
 ADD bin /root/
 RUN chmod +x /root/*.sh;mkdir /root/logs
+RUN apt-get install curl libcurl3 libcurl3-dev php5-curl
 RUN curl -O --user 'liushiming:Hello899' http://repo.quancheng-ec.com/repository/documentation/pinpoint-agent-1.6.1-SNAPSHOT.zip \
 	&& unzip ./pinpoint-agent-1.6.1-SNAPSHOT.zip -d . \
     && rm -r ./pinpoint-agent-1.6.1-SNAPSHOT.zip

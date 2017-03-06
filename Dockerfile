@@ -5,7 +5,7 @@ ADD build/libs/yugong.jar /root/yugong.jar
 ADD bin /root/
 RUN chmod +x /root/*.sh;mkdir /root/logs
 RUN set -x \
-	&& curl -I --user 'liushiming:Hello899' -O "http://repo.quancheng-ec.com/repository/documentation/pinpoint-agent-1.6.1-SNAPSHOT.zip" \
+	&& wget --http-user=liushiming --http-passwd=Hello899 -P ./ "http://repo.quancheng-ec.com/repository/documentation/pinpoint-agent-1.6.1-SNAPSHOT.zip" \
 	&& unzip ./pinpoint-agent-1.6.1-SNAPSHOT.zip -d . \
     && rm -r ./pinpoint-agent-1.6.1-SNAPSHOT.zip
 ENV JAVA_OPTS ""

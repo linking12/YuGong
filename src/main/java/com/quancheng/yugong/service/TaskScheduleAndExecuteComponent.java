@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import org.xbib.tools.JDBCImporter;
 
 import com.quancheng.yugong.common.Constants;
+import com.quancheng.yugong.common.YugongUtils;
 import com.quancheng.yugong.dto.SyncTaskDTO;
 import com.quancheng.yugong.repository.SyncTaskDao;
 import com.quancheng.yugong.repository.SyncTaskStateDao;
@@ -91,6 +92,8 @@ public class TaskScheduleAndExecuteComponent {
         Iterator<SyncTaskDO> it = tasks.iterator();
         while (it.hasNext()) {
             SyncTaskDO taskDo = it.next();
+            taskDo.setExcuteNode(YugongUtils.getLocalHost());
+            taskDao.save(taskDo);
             boolean isNotRun = taskDo.getSyncTaskState() == null || !taskDo.getSyncTaskState().getIsCanceled();
             if (isNotRun) {
                 saveAndRunTask(taskDo.getSetting());

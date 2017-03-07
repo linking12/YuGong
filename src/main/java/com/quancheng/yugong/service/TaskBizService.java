@@ -8,8 +8,6 @@
 package com.quancheng.yugong.service;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.xbib.tools.JDBCImporter;
 
+import com.quancheng.yugong.common.YugongUtils;
 import com.quancheng.yugong.dto.SyncTaskDTO;
 import com.quancheng.yugong.repository.SyncTaskDao;
 import com.quancheng.yugong.repository.SyncTaskStateDao;
@@ -34,29 +33,20 @@ import com.quancheng.yugong.vo.SyncTaskVO;
 @Service
 public class TaskBizService {
 
-    private static final Logger       logger = LoggerFactory.getLogger(TaskBizService.class);
+    private static final Logger             logger = LoggerFactory.getLogger(TaskBizService.class);
     @Autowired
-    private SyncTaskStateDao          stateDao;
-
-    @Autowired
-    private SyncTaskDao               taskDao;
+    private SyncTaskStateDao                stateDao;
 
     @Autowired
-    private TaskLocalStoregeComponent taskLocalStoreService;
+    private SyncTaskDao                     taskDao;
 
     @Autowired
-    private TaskScheduleAndExecuteComponent      excutorTaskService;
+    private TaskLocalStoregeComponent       taskLocalStoreService;
 
-    private Object                    lock   = new Object();
+    @Autowired
+    private TaskScheduleAndExecuteComponent excutorTaskService;
 
-    private String getLocalHost() {
-        try {
-            return InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+    private Object                          lock   = new Object();
 
     public Boolean submitTask(String syncSetting) {
         SyncTaskDTO syncTaskDTO = new SyncTaskDTO(syncSetting, taskDao, stateDao);
@@ -72,7 +62,7 @@ public class TaskBizService {
                 taskDo.setIndex(syncTaskDTO.getIndex());
                 taskDo.setType(syncTaskDTO.getType());
                 taskDo.setSetting(syncTaskDTO.getSetting());
-                taskDo.setExcuteNode(getLocalHost());
+                taskDo.setExcuteNode(YugongUtils.getLocalHost());
                 taskDao.save(taskDo).getId();
                 // step3 : run task
                 excutorTaskService.executeTask(syncTaskDTO, importer);

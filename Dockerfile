@@ -7,5 +7,4 @@ RUN chmod +x /root/*.sh;mkdir /root/logs
 ENV JAVA_OPTS ""
 ENV PINPINT_AGENT_VERSION "1.6.1-SNAPSHOT"
 WORKDIR /root
-RUN ./agent.sh
-CMD ["./start.sh"]
+CMD ["./agent.sh,./start.sh"]

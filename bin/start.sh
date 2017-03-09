@@ -1,4 +1,5 @@
 #!/bin/sh
+. ./agent.sh
 app_prefix=${APP_NAME}-`hostname`
 JAVA_OPTS="-server -Xss256k $JAVA_OPTS"
 JAVA_OPTS="${JAVA_OPTS} -XX:SurvivorRatio=10"

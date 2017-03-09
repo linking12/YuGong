@@ -11,5 +11,6 @@ JAVA_OPTS="${JAVA_OPTS} -Djava.awt.headless=true"
 JAVA_OPTS="${JAVA_OPTS} -Dsun.net.client.defaultConnectTimeout=10000"
 JAVA_OPTS="${JAVA_OPTS} -Dsun.net.client.defaultReadTimeout=30000"
 JAVA_OPTS="${JAVA_OPTS} -DAPP_NAME=${APP_NAME}"
-JAVA_OPTS="${JAVA_OPTS} -javaagent:/root/pinpoint-agent-$PINPINT_AGENT_VERSION/pinpoint-bootstrap-$PINPINT_AGENT_VERSION.jar -Dpinpoint.agentId=yugong -Dpinpoint.applicationName=yugong"
+AGENTID=date +%s%N
+JAVA_OPTS="${JAVA_OPTS} -javaagent:/root/pinpoint-agent-$PINPINT_AGENT_VERSION/pinpoint-bootstrap-$PINPINT_AGENT_VERSION.jar -Dpinpoint.agentId=$AGENTID -Dpinpoint.applicationName=yugong"
 java -Djava.security.egd=file:/dev/./urandom $JAVA_OPTS -jar ./yugong.jar

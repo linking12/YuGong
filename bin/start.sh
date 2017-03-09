@@ -1,10 +1,5 @@
 #!/bin/sh
-if ifconfig |grep eth1 >/dev/null ;then
-        NIC=eth0
-else
-        NIC=en0
-fi
-LOCAL_IP=`LANG=C ifconfig $NIC|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
+LOCAL_IP=`LANG=C ifconfig eth0|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
 app_prefix=${APP_NAME}-`hostname`
 JAVA_OPTS="-server -Xss256k $JAVA_OPTS"
 JAVA_OPTS="${JAVA_OPTS} -XX:SurvivorRatio=10"

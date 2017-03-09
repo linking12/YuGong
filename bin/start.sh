@@ -1,4 +1,10 @@
 #!/bin/sh
+if ifconfig |grep eth1 >/dev/null ;then
+        NIC=eth0
+else
+        NIC=en0
+fi
+LOCAL_IP=`LANG=C ifconfig $NIC|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
 app_prefix=${APP_NAME}-`hostname`
 JAVA_OPTS="-server -Xss256k $JAVA_OPTS"
 JAVA_OPTS="${JAVA_OPTS} -XX:SurvivorRatio=10"
@@ -11,5 +17,5 @@ JAVA_OPTS="${JAVA_OPTS} -Djava.awt.headless=true"
 JAVA_OPTS="${JAVA_OPTS} -Dsun.net.client.defaultConnectTimeout=10000"
 JAVA_OPTS="${JAVA_OPTS} -Dsun.net.client.defaultReadTimeout=30000"
 JAVA_OPTS="${JAVA_OPTS} -DAPP_NAME=${APP_NAME}"
-JAVA_OPTS="${JAVA_OPTS} -javaagent:/root/pinpoint-agent-1.6.1-SNAPSHOT/pinpoint-bootstrap-1.6.1-SNAPSHOT.jar -Dpinpoint.agentId=yugong -Dpinpoint.applicationName=yugong"
+JAVA_OPTS="${JAVA_OPTS} -javaagent:/root/pinpoint-agent-1.6.1-SNAPSHOT/pinpoint-bootstrap-1.6.1-SNAPSHOT.jar -Dpinpoint.agentId=yugong-$LOCAL_IP -Dpinpoint.applicationName=yugong"
 java -Djava.security.egd=file:/dev/./urandom $JAVA_OPTS -jar ./yugong.jar

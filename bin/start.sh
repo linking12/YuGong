@@ -1,5 +1,5 @@
 #!/bin/sh
-LOCAL_IP=`LANG=C ifconfig eth0|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
+LOCAL_IP=`ifconfig eth0|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
 app_prefix=${APP_NAME}-`hostname`
 JAVA_OPTS="-server -Xss256k $JAVA_OPTS"
 JAVA_OPTS="${JAVA_OPTS} -XX:SurvivorRatio=10"

@@ -14,8 +14,13 @@ repositories {
     mavenCentral()
     jcenter()
     maven {
-	        url "http://xbib.org/repository"
-	}
+            credentials {
+                username='liushiming'
+                password='Hello899'
+            }
+            url 'http://repo.quancheng-ec.com/repository/maven-public/'
+          }
+    maven { url "http://xbib.org/repository"}
 }
 ext {
     versions = [
@@ -25,7 +30,8 @@ ext {
       'wagon' : '2.10',
       'mysql' : '5.1.38',
       'jts' : '1.13',
-      'jdbc-driver-csv': '1.0.0'
+      'jdbc-driver-csv': '1.0.0',
+      'odps': '2.2'
     ]
 }
 configurations {
@@ -40,6 +46,7 @@ dependencies {
     compile('org.xbib.jdbc:jdbc-driver-csv:' + versions.'jdbc-driver-csv') {
         exclude group: 'org.apache.logging.log4j'
     }
+    compile 'com.aliyun.odps:odps-jdbc:' + versions.odps
     compile 'mysql:mysql-connector-java:' + versions.mysql
     compile 'org.apache.maven.wagon:wagon-ssh-external:' + versions.wagon
     compile 'com.google.code.gson:gson:2.8.0'
